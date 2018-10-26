@@ -14,8 +14,7 @@ public class Main {
 		State goal = new State(goalSeq);
 		Path searchPath = BFS.search(parent, goal);
 		for(State s : searchPath.getStates()) {
-			System.out.print(s);
-			System.out.println("  |");
+			System.out.println(s);
 			System.out.println("  |");
 			System.out.println("  |");
 			System.out.println("  V");
@@ -24,7 +23,7 @@ public class Main {
 		State s1 = new State(testSeq);
 		State s2 = new State(testSeq);
 
-		System.out.println(s1.equals(s2));
-		System.out.println(Arrays.equals(testSeq,testSeq1));
+//		System.out.println(s1.equals(s2));
+//		System.out.println(Arrays.equals(testSeq,testSeq1));
 	}
 }

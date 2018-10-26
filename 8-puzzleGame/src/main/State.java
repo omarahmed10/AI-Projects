@@ -59,7 +59,7 @@ public class State {
 		int[][] newPuzzle = clone(puzzle);
 		newPuzzle[blank.x][blank.y] = newPuzzle[blank.x + x][blank.y + y];
 		newPuzzle[blank.x + x][blank.y + y] = temp;
-		return newPuzzle; // because java pass by value :)
+		return newPuzzle;
 	}
 
 	private Point getBlankPosition() {
@@ -88,7 +88,7 @@ public class State {
 			for (int j = 0; j < SIZE; j++) {
 				s += puzzle[i][j] + " ";
 			}
-			s += i < SIZE ? "\n" : "";
+			s += i + 1 < SIZE ? "\n" : "";
 		}
 		return s;
 	}

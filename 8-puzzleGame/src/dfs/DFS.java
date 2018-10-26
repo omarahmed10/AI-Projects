@@ -21,7 +21,7 @@ public class DFS {
                 return path;
             }
             for (State neighbor : currentState.getNeighbors()) {
-                if (!path.contains(neighbor) && !explored.contains(neighbor)) {
+                if (!frontier.contains(path) && !explored.contains(neighbor)) {
                     // System.out.println(neighbor+"\n==================");
                     Path newPath = new Path(path);
                     newPath.addState(neighbor);
