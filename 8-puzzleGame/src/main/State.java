@@ -2,13 +2,14 @@ package main;
 
 import java.awt.Point;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
-
 public class State {
-	private static int SIZE = 3;
+	public static int SIZE = 3;
 	private int[][] puzzle;
 	private List<State> neighbors;
+	private float cost;
 
 	private State(int[][] puzzle) {
 		this.puzzle = puzzle;
@@ -77,7 +78,7 @@ public class State {
 		if (arg0 == null) {
 			return false;
 		}
-		return this.puzzle == ((State) arg0).puzzle;
+		return Arrays.deepEquals(this.puzzle, ((State) arg0).puzzle);
 	}
 
 	@Override
@@ -90,5 +91,17 @@ public class State {
 			s += i < SIZE ? "\n" : "";
 		}
 		return s;
+	}
+
+	public int[][] getPuzzle() {
+		return puzzle;
+	}
+
+	public void setCost(float cost) {
+		this.cost = cost;
+	}
+
+	public float getCost() {
+		return cost;
 	}
 }
