@@ -2,6 +2,7 @@ package main;
 
 import java.awt.Point;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 
@@ -77,7 +78,8 @@ public class State {
 		if (arg0 == null) {
 			return false;
 		}
-		return this.puzzle == ((State) arg0).puzzle;
+		
+		return Arrays.deepEquals(this.puzzle, ((State) arg0).puzzle);
 	}
 
 	@Override
