@@ -25,7 +25,7 @@ public class State {
 	}
 
 	public List<State> getNeighbors() {
-		neighbors = new ArrayList<State>();
+		neighbors = new ArrayList<>();
 		Point blank = getBlankPosition();
 		if (blank == null)
 			return neighbors;
@@ -35,12 +35,12 @@ public class State {
 		if (blank.x - 1 >= 0) {
 			neighbors.add(new State(move(blank, puzzle, -1, 0)));
 		}
-		if (blank.y + 1 < SIZE) {
-			neighbors.add(new State(move(blank, puzzle, 0, 1)));
-		}
-		if (blank.y - 1 >= 0) {
-			neighbors.add(new State(move(blank, puzzle, 0, -1)));
-		}
+        if (blank.y + 1 < SIZE) {
+            neighbors.add(new State(move(blank, puzzle, 0, 1)));
+        }
+        if (blank.y - 1 >= 0) {
+            neighbors.add(new State(move(blank, puzzle, 0, -1)));
+        }
 		return neighbors;
 	}
 
@@ -78,7 +78,7 @@ public class State {
 		if (arg0 == null) {
 			return false;
 		}
-		
+
 		return Arrays.deepEquals(this.puzzle, ((State) arg0).puzzle);
 	}
 
