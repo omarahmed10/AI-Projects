@@ -9,7 +9,10 @@ import java.util.Set;
 import main.State;
 
 public class BFS {
+	public static int MaxDepth = 0;
+
 	public static Path search(State initState, State goalState) {
+		MaxDepth = 0;
 		Queue<Path> frontier = new LinkedList<>();
 		Set<State> explored = new HashSet<State>();
 		Path initPath = new Path(initState);
@@ -26,6 +29,7 @@ public class BFS {
 //					System.out.println(neighbor+"\n==================");
 					Path newPath = new Path(path);
 					newPath.addState(neighbor);
+					MaxDepth = Math.max(MaxDepth, newPath.getCost());
 					frontier.add(newPath);
 				}
 			}

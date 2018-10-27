@@ -30,9 +30,14 @@ public class Path {
 		return stateList;
 	}
 
-    public boolean contains(State s) {
-        return this.stateList.contains(s);
-    }
+	public int getCost() {
+		return stateList.size() - 1;
+	}
+
+	public boolean contains(State s) {
+		return this.stateList.contains(s);
+	}
+
 	@Override
 	public boolean equals(Object obj) {
 		return this.stateList.getLast().equals(((Path) obj).stateList.getLast());

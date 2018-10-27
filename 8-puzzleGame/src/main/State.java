@@ -10,6 +10,8 @@ public class State {
 	private int[][] puzzle;
 	private List<State> neighbors;
 	private float cost;
+	
+	public State parent;
 
 	private State(int[][] puzzle) {
 		this.puzzle = puzzle;
@@ -29,18 +31,18 @@ public class State {
 		Point blank = getBlankPosition();
 		if (blank == null)
 			return neighbors;
-		if (blank.x + 1 < SIZE) {
-			neighbors.add(new State(move(blank, puzzle, 1, 0)));
-		}
-		if (blank.x - 1 >= 0) {
+		if (blank.x - 1 >= 0) { // UP
 			neighbors.add(new State(move(blank, puzzle, -1, 0)));
 		}
-        if (blank.y + 1 < SIZE) {
-            neighbors.add(new State(move(blank, puzzle, 0, 1)));
-        }
-        if (blank.y - 1 >= 0) {
-            neighbors.add(new State(move(blank, puzzle, 0, -1)));
-        }
+		if (blank.x + 1 < SIZE) { // Down
+			neighbors.add(new State(move(blank, puzzle, 1, 0)));
+		}
+		if (blank.y - 1 >= 0) { // Left
+			neighbors.add(new State(move(blank, puzzle, 0, -1)));
+		}
+		if (blank.y + 1 < SIZE) { // Right
+			neighbors.add(new State(move(blank, puzzle, 0, 1)));
+		}
 		return neighbors;
 	}
 
