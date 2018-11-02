@@ -75,7 +75,7 @@ public class AStar {
 				return path;
 			}
 			for (State neighbor : currentState.getNeighbors()) {
-				if (!frontier.contains(path) && !explored.contains(neighbor)) {
+				if (!frontier.contains(new Path(neighbor)) && !explored.contains(neighbor)) {
 					neighbor.setCost(euclideanScore(neighbor, goalState));
 					Path newPath = new Path(path);
 					newPath.addState(neighbor);
@@ -111,7 +111,7 @@ public class AStar {
 				return path;
 			}
 			for (State neighbor : currentState.getNeighbors()) {
-				if (!frontier.contains(path) && !explored.contains(neighbor)) {
+				if (!frontier.contains(new Path(neighbor)) && !explored.contains(neighbor)) {
 					neighbor.setCost(manhattanScore(neighbor, goalState));
 					Path newPath = new Path(path);
 					newPath.addState(neighbor);
