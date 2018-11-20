@@ -3,9 +3,9 @@ package risk;
 import java.util.ArrayList;
 
 public class Territory {
-    int id;
-    Player owner;
-    int armies;
+    private int id;
+    private Player owner;
+    private int armies;
     ArrayList<Territory> neighbors;
 
     public Territory(int id) {
