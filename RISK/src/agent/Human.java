@@ -12,24 +12,26 @@ import map.Territory;
 
 public class Human extends Agent {
 
-
 	public Human(Agent enemy, List<Continent> continents,
 			List<Territory> allTerritories) {
 		super(enemy, continents, allTerritories);
-		// TODO Auto-generated constructor stub
 	}
 
 	private Scanner scanner = new Scanner(System.in);
 
 	@Override
 	public void placeArmies() {
-		System.out
-				.print("Enter id of the territory you want to place the armies in : ");
+		super.placeArmies();
+
+		if (bonusArmies == 0)
+			return;
 
 		boolean wrongId = true;
 
 		while (wrongId) {
-			int territoryId = scanner.nextInt();
+			System.out.print(
+					"Enter id of the territory you want to place the armies in : ");
+			int territoryId = scanner.nextInt() - 1;
 
 			// If the agent owns this territory , then assign the armies.
 			// otherwise user re-enter the id
@@ -44,19 +46,29 @@ public class Human extends Agent {
 			if (wrongId)
 				System.out.println("Wrong id! Please insert a valid id");
 		}
+
+		bonusArmies = 0;
 	}
 
 	@Override
 	public void attack() {
-		System.out.print(
-				"Enter ids of the territory you want to attack with, the attacked one and"
-						+ " number of armies you want to attack with seperated (Enter -1 to skip) : ");
 
 		while (true) {
-			int agentTerritoryId = scanner.nextInt();
+
+			List<Territory> possAttTerrs = possAttTerrs();
+
+			if (possAttTerrs.isEmpty()) {
+				System.out.println("No territory can be attacked!");
+				return;
+			}
+
+			System.out.print(
+					"Enter ids of the territory you want to attack with, the attacked one and\n"
+							+ "number of armies you want to attack with seperated (Enter -1 to skip) : ");
+			int agentTerritoryId = scanner.nextInt() - 1;
 			if (agentTerritoryId == -1)
 				return;
-			int enemyTerritoryId = scanner.nextInt();
+			int enemyTerritoryId = scanner.nextInt() - 1;
 			int attackArmies = scanner.nextInt();
 
 			Territory agentTerritory = allTerritories.get(agentTerritoryId);
@@ -68,15 +80,10 @@ public class Human extends Agent {
 				continue;
 			}
 
-			// attacked territory must not be owned by the player
-			if (territories.contains(enemyTerritory)) {
-				System.out.println("Second territory is owned by you!");
-				continue;
-			}
-
-			// agent and attacked territories must be neighbors
-			if (agentTerritory.getNeighbors().contains(enemyTerritory)) {
-				System.out.println("The territories are not neighbors!");
+			// enemy territory must be attackable & must be neighbor to the agent's
+			if (!possAttTerrs.contains(enemyTerritory)
+					|| !agentTerritory.getNeighbors().contains(enemyTerritory)) {
+				System.out.println("You can't attack this territory!");
 				continue;
 			}
 

@@ -11,7 +11,7 @@ public class Agent {
 	protected List<Continent> continents;
 	protected List<Territory> allTerritories;
 	protected List<Territory> territories;
-	protected SemiContinent[] semiContinents;
+	protected List<SemiContinent> semiContinents;
 	protected int bonusArmies;
 	protected Agent enemy;
 	protected int searchExp;
@@ -26,9 +26,10 @@ public class Agent {
 	}
 
 	private void initSemiContinents() {
-		semiContinents = new SemiContinent[continents.size()];
-		for (int i = 0; i < semiContinents.length; i++) {
-			semiContinents[i] = new SemiContinent(i, continents.get(i).getValue());
+		semiContinents = new ArrayList<>();
+		for (int i = 0; i < continents.size(); i++) {
+			semiContinents.add(new SemiContinent(i, continents.get(i).getValue()));
+			semiContinents.get(i).setDiff(continents.get(i).getTerritories().size());
 		}
 	}
 
@@ -51,11 +52,11 @@ public class Agent {
 	}
 
 	public void placeArmies() {
-
+		System.out.println("There are " + bonusArmies + " armies to place");
 	}
 
 	public void attack() {
-
+		
 	}
 
 	public List<Territory> possAttTerrs() {
@@ -65,7 +66,7 @@ public class Agent {
 			for (Territory neighbor : territory.getNeighbors()) {
 				if (!territories.contains(neighbor)
 						&& (territory.getArmies() - neighbor.getArmies()) > 1
-						&& possAttTerrs.contains(neighbor)) {
+						&& !possAttTerrs.contains(neighbor)) {
 					possAttTerrs.add(neighbor);
 				}
 			}
@@ -76,23 +77,35 @@ public class Agent {
 
 	public void addTerritory(Territory territory) {
 		territories.add(territory);
-		semiContinents[territory.getContinent().getId()].addTerritory(territory);
+
+		SemiContinent semiContinent = semiContinents
+				.get(territory.getContinent().getId());
+		semiContinent.addTerritory(territory);
+		semiContinent.setDiff(semiContinent.getDiff() - 1);
 	}
 
 	public void removeTerritory(Territory territory) {
 		territories.remove(territory);
-		semiContinents[territory.getContinent().getId()].removeTerritory(territory);
+
+		SemiContinent semiContinent = semiContinents
+				.get(territory.getContinent().getId());
+		semiContinent.removeTerritory(territory);
+		semiContinent.setDiff(semiContinent.getDiff() + 1);
 	}
 
 	public void setBonusArmies(int bonusArmies) {
 		this.bonusArmies = bonusArmies;
 	}
 
+	public void setEnemy(Agent enemy) {
+		this.enemy = enemy;
+	}
+
 	public List<Territory> getTerritories() {
 		return territories;
 	}
 
-	public Continent[] getSemiContinents() {
+	public List<SemiContinent> getSemiContinents() {
 		return semiContinents;
 	}
 
@@ -100,13 +113,40 @@ public class Agent {
 			int attackArmies) {
 		agentTerritory.setArmies(agentTerritory.getArmies() - attackArmies);
 		enemyTerritory.setArmies(attackArmies - enemyTerritory.getArmies());
-
+		
 		// May be the territory is neutral
 		if (enemyTerritory.getOwner() != null)
 			enemyTerritory.getOwner().removeTerritory(enemyTerritory);
-
+		
 		enemyTerritory.assignOwner(this);
 		addTerritory(enemyTerritory);
+
+		bonusArmies = 2;
+	}
+
+	public void addContBonus() {
+		for (SemiContinent semiContinent : semiContinents) {
+			if (semiContinent.getDiff() == 0)
+				bonusArmies += semiContinent.getValue();
+		}
+	}
+
+	public boolean gameOver() {
+		boolean gameOver = true;
+		for (SemiContinent semiContinent : semiContinents) {
+			if (semiContinent.getDiff() != 0) {
+				gameOver = false;
+				break;
+			}
+		}
+		return gameOver;
+	}
+
+	@Override
+	public String toString() {
+		String s = "Territories : " + territories + " ,, ";
+		s += "Semicontinents : " + semiContinents;
+		return s;
 	}
 
 }

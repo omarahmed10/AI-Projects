@@ -23,7 +23,11 @@ public class Passive extends Agent {
 
 	@Override
 	public void placeArmies() {
+		super.placeArmies();
+
 		Territory minTerritory = Collections.min(territories);
 		minTerritory.setArmies(bonusArmies + minTerritory.getArmies());
+		
+		bonusArmies = 0;
 	}
 }
