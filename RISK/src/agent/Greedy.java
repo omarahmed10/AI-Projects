@@ -1,9 +1,15 @@
 package agent;
 
-public class Greedy  extends Agent{
+import java.util.List;
 
-	public Greedy(int contNum) {
-		super(contNum);
+import map.Continent;
+import map.Territory;
+
+public class Greedy extends Agent {
+
+	public Greedy(Agent enemy, List<Continent> continents,
+			List<Territory> allTerritories) {
+		super(enemy, continents, allTerritories);
 		// TODO Auto-generated constructor stub
 	}
 

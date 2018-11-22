@@ -15,9 +15,11 @@ import map.Territory;
  * */
 
 public class Aggressive extends Agent {
-	
-	public Aggressive(int contNum) {
-		super(contNum);
+
+	public Aggressive(Agent enemy, List<Continent> continents,
+			List<Territory> allTerritories) {
+		super(enemy, continents, allTerritories);
+		// TODO Auto-generated constructor stub
 	}
 
 	@Override
@@ -27,29 +29,45 @@ public class Aggressive extends Agent {
 	}
 
 	@Override
-	public void attack(List<Territory> Allterritories, List<Continent> continents,
-			Agent enemy) {
+	public void attack() {
 		Continent[] enemySemiConts = enemy.getSemiContinents();
-		int[] contDiffs = new int[enemySemiConts.length];
-
-		for (int i = 0; i < enemySemiConts.length; i++) {
-			contDiffs[i] = continents.get(i).getTerritories().size()
-					- enemySemiConts[i].getTerritories().size();
-		}
-
-		int[] contDiffsSort = contDiffs;
-		Arrays.sort(contDiffsSort);
+		Arrays.sort(enemySemiConts);
 
 		List<Territory> possAttTerrs = possAttTerrs();
+		Collections.sort(possAttTerrs);
 
 		// choose the territory
-		for (int i = 0, lastInd = -1; i < contDiffsSort.length; i++) {
-			for (int j = 0; j < contDiffs.length; j++) {
-				if (contDiffsSort[i] == contDiffs[j] && j != lastInd) {
 
+		// if there is no enemy territory to attack select
+		// the neutral territory with largest armies
+		Territory attTerr = possAttTerrs.get(possAttTerrs.size() - 1);
+
+		boolean attEnemy = false;
+		for (int i = enemySemiConts.length - 1; i >= 0; i--) {
+			for (int j = possAttTerrs.size() - 1; j >= 0; j--) {
+				if (possAttTerrs.get(j).getContinent().getId() == enemySemiConts[i]
+						.getId()) {
+					attTerr = possAttTerrs.get(j);
+					attEnemy = true;
+					break;
 				}
 			}
+			if (attEnemy)
+				break;
 		}
+
+		// choose the territory with max armies to attack with
+		Collections.sort(attTerr.getNeighbors());
+		for (int i = attTerr.getNeighbors().size() - 1; i >= 0; i--) {
+			Territory neighbor = attTerr.getNeighbors().get(i);
+
+			if (territories.contains(neighbor)) {
+				// attack with all armies except for one
+				doAttack(neighbor, attTerr, neighbor.getArmies() - 1);
+				break;
+			}
+		}
+
 	}
 
 }

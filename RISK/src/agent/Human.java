@@ -3,6 +3,7 @@ package agent;
 import java.util.List;
 import java.util.Scanner;
 
+import map.Continent;
 import map.Territory;
 
 /*
@@ -10,8 +11,11 @@ import map.Territory;
  * */
 
 public class Human extends Agent {
-	public Human(int contNum) {
-		super(contNum);
+
+
+	public Human(Agent enemy, List<Continent> continents,
+			List<Territory> allTerritories) {
+		super(enemy, continents, allTerritories);
 		// TODO Auto-generated constructor stub
 	}
 
@@ -43,7 +47,7 @@ public class Human extends Agent {
 	}
 
 	@Override
-	public void attack(List<Territory> Allterritories) {
+	public void attack() {
 		System.out.print(
 				"Enter ids of the territory you want to attack with, the attacked one and"
 						+ " number of armies you want to attack with seperated (Enter -1 to skip) : ");
@@ -55,8 +59,8 @@ public class Human extends Agent {
 			int enemyTerritoryId = scanner.nextInt();
 			int attackArmies = scanner.nextInt();
 
-			Territory agentTerritory = Allterritories.get(agentTerritoryId);
-			Territory enemyTerritory = Allterritories.get(enemyTerritoryId);
+			Territory agentTerritory = allTerritories.get(agentTerritoryId);
+			Territory enemyTerritory = allTerritories.get(enemyTerritoryId);
 
 			// agent territory must be owned by the player
 			if (!territories.contains(agentTerritory)) {
@@ -91,10 +95,7 @@ public class Human extends Agent {
 			}
 
 			// Do the attack
-			enemyTerritory.setArmies(attackArmies - enemyTerritory.getArmies());
-			enemyTerritory.getOwner().removeTerritory(enemyTerritory);
-			enemyTerritory.assignOwner(this);
-			addTerritory(enemyTerritory);
+			doAttack(agentTerritory, enemyTerritory, attackArmies);
 			break;
 		}
 	}

@@ -36,12 +36,12 @@ public class Game {
 		System.out.println("=> ");
 		int agentId2 = scanner.nextInt();
 
-		Agent a1 = Agent.agentFactory(agentId1);
-		Agent a2 = Agent.agentFactory(agentId2);
+//		Agent a1 = Agent.agentFactory(agentId1);
+//		Agent a2 = Agent.agentFactory(agentId2);
 
-		while (true) {
-
-		}
+//		while (true) {
+//
+//		}
 	}
 
 }

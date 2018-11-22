@@ -1,9 +1,15 @@
 package agent;
 
-public class AStar  extends Agent{
+import java.util.List;
 
-	public AStar(int contNum) {
-		super(contNum);
+import map.Continent;
+import map.Territory;
+
+public class AStar extends Agent {
+
+	public AStar(Agent enemy, List<Continent> continents,
+			List<Territory> allTerritories) {
+		super(enemy, continents, allTerritories);
 		// TODO Auto-generated constructor stub
 	}
 

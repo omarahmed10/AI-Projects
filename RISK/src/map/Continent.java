@@ -4,9 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Continent {
-	private int id;
-	private int value;
-	private List<Territory> territories;
+	protected int id;
+	protected int value;
+	protected List<Territory> territories;
 
 	public Continent(int id, int val) {
 		this.id = id;
@@ -16,10 +16,6 @@ public class Continent {
 
 	public void addTerritory(Territory territory) {
 		territories.add(territory);
-	}
-
-	public void removeTerritory(Territory territory) {
-		territories.remove(territory);
 	}
 
 	public int getId() {

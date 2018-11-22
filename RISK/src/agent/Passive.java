@@ -1,7 +1,9 @@
 package agent;
 
 import java.util.Collections;
+import java.util.List;
 
+import map.Continent;
 import map.Territory;
 
 /*
@@ -11,8 +13,11 @@ import map.Territory;
  * */
 
 public class Passive extends Agent {
-	public Passive(int contNum) {
-		super(contNum);
+
+
+	public Passive(Agent enemy, List<Continent> continents,
+			List<Territory> allTerritories) {
+		super(enemy, continents, allTerritories);
 		// TODO Auto-generated constructor stub
 	}
 
