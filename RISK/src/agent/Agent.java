@@ -65,7 +65,7 @@ public class Agent {
 			for (Territory neighbor : territory.getNeighbors()) {
 				if (!territories.contains(neighbor)
 						&& (territory.getArmies() - neighbor.getArmies()) > 1
-						&& possAttTerrs.contains(neighbor)) {
+						&& !possAttTerrs.contains(neighbor)) {
 					possAttTerrs.add(neighbor);
 				}
 			}
