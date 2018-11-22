@@ -32,8 +32,12 @@ public class Continent {
 
 	@Override
 	public String toString() {
-		String s = "id=" + id + " , " + "territories : ";
-		s += territories.toString();
+		String s = "(id=" + (id + 1) + " , " + "value=" + value
+				+ " , territories : ";
+		for (Territory territory : territories) {
+			s += territory.getId() + " ";
+		}
+		s += ")";
 		return s;
 	}
 }

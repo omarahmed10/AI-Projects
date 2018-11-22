@@ -56,21 +56,27 @@ public class Territory implements Comparable<Territory> {
 
 	@Override
 	public String toString() {
-		return "id=" + id + " , " + "armies=" + armies;
+		return "(id=" + (id + 1) + " , " + "armies=" + armies + ")";
 	}
 
 	@Override
 	public int compareTo(Territory t) {
 		if (t.getArmies() < armies)
-			return -1;
-		if (t.getArmies() > armies)
 			return 1;
+		if (t.getArmies() > armies)
+			return -1;
 
 		// break ties by neighbors numbers
 		if (t.getNeighbors().size() < neighbors.size())
-			return -1;
-		if (t.getNeighbors().size() > neighbors.size())
 			return 1;
+		if (t.getNeighbors().size() > neighbors.size())
+			return -1;
+
+		// break ties by ids
+		if (t.getId() < id)
+			return 1;
+		if (t.getId() > id)
+			return -1;
 
 		return 0;
 	}

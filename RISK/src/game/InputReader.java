@@ -73,15 +73,17 @@ public class InputReader {
 			int val = scanner.nextInt();
 			continents.add(new Continent(i, val));
 
-			System.out.print("Continent " + i + " is added" + "with value " + val
+			System.out.print("Continent " + i + " is added " + "with value " + val
 					+ " and its members ");
 
 			// the territories numvber in a continent may vary
 			while (scanner.hasNextInt()) {
 				int terrId = scanner.nextInt() - 1;
 				continents.get(i).addTerritory(territories.get(terrId));
-				System.out.println(terrId + " ");
+				System.out.print(terrId + " ");
 			}
+			
+			System.out.println();
 
 			scanner.close();
 		}
