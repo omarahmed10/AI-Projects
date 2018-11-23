@@ -9,7 +9,7 @@ public class Territory implements Comparable<Territory> {
 	private int id;
 	private int armies;
 	private Continent continent;
-	private Agent owner;
+	public Agent owner;
 	List<Territory> neighbors;
 
 	public Territory(int id) {
@@ -18,11 +18,11 @@ public class Territory implements Comparable<Territory> {
 		this.neighbors = new ArrayList<>();
 	}
 
-	public Territory(Territory clone) {
+	public Territory(Territory clone, Agent owner) {
 		this.id = clone.id;
 		this.armies = clone.armies;
 		this.continent = clone.continent;
-		this.owner = new Agent(clone.owner);
+		this.owner = owner;
 		this.neighbors = clone.neighbors;
 	}
 
@@ -64,7 +64,9 @@ public class Territory implements Comparable<Territory> {
 
 	@Override
 	public boolean equals(Object obj) {
-		return id == ((Territory) obj).id;
+		Territory tObj = (Territory) obj;
+		System.out.println((id == tObj.id) + " " + (armies == tObj.armies) + " " + (owner.id + " " + tObj.id));
+		return id == tObj.id && armies == tObj.armies && owner.id == tObj.id;
 	}
 
 	@Override
@@ -94,10 +96,9 @@ public class Territory implements Comparable<Territory> {
 		return 0;
 	}
 
-	public static void clone(List<Territory> dest, List<Territory> source) {
-		dest = new ArrayList<>();
+	public static void clone(List<Territory> dest, List<Territory> source, Agent owner) {
 		for (Territory t : source) {
-			Territory newT = new Territory(t);
+			Territory newT = new Territory(t, owner);
 			dest.add(newT);
 		}
 	}

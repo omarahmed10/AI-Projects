@@ -16,9 +16,8 @@ import map.Territory;
 
 public class Aggressive extends Agent {
 
-	public Aggressive(Agent enemy, List<Continent> continents,
-			List<Territory> allTerritories) {
-		super(enemy, continents, allTerritories);
+	public Aggressive(int id, Agent enemy, List<Continent> continents, List<Territory> allTerritories) {
+		super(id, enemy, continents, allTerritories);
 		// TODO Auto-generated constructor stub
 	}
 
@@ -55,8 +54,7 @@ public class Aggressive extends Agent {
 		boolean attEnemy = false;
 		for (int i = enemySemiConts.size() - 1; i >= 0; i--) {
 			for (int j = possAttTerrs.size() - 1; j >= 0; j--) {
-				if (possAttTerrs.get(j).getContinent().getId() == enemySemiConts.get(i)
-						.getId()) {
+				if (possAttTerrs.get(j).getContinent().getId() == enemySemiConts.get(i).getId()) {
 					attTerr = possAttTerrs.get(j);
 					attEnemy = true;
 					break;

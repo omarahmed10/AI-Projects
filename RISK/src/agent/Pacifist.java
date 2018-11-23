@@ -14,9 +14,9 @@ import map.Territory;
 
 public class Pacifist extends Agent {
 
-	public Pacifist(Agent enemy, List<Continent> continents,
+	public Pacifist(int id, Agent enemy, List<Continent> continents,
 			List<Territory> allTerritories) {
-		super(enemy, continents, allTerritories);
+		super(id, enemy, continents, allTerritories);
 	}
 
 	@Override

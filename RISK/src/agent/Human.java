@@ -12,9 +12,9 @@ import map.Territory;
 
 public class Human extends Agent {
 
-	public Human(Agent enemy, List<Continent> continents,
+	public Human(int id, Agent enemy, List<Continent> continents,
 			List<Territory> allTerritories) {
-		super(enemy, continents, allTerritories);
+		super(id, enemy, continents, allTerritories);
 	}
 
 	private Scanner scanner = new Scanner(System.in);

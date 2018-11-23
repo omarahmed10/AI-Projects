@@ -7,9 +7,9 @@ import map.Territory;
 
 public class RtAStar  extends Agent{
 
-	public RtAStar(Agent enemy, List<Continent> continents,
+	public RtAStar(int id, Agent enemy, List<Continent> continents,
 			List<Territory> allTerritories) {
-		super(enemy, continents, allTerritories);
+		super(id, enemy, continents, allTerritories);
 		// TODO Auto-generated constructor stub
 	}
 

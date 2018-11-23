@@ -17,29 +17,34 @@ public class Agent {
 	protected int bonusArmies;
 	protected Agent enemy;
 	protected int searchExp;
+	public int id;
 
 	public Agent(Agent clone) {
-		Territory.clone(this.territories, clone.territories);
-		Territory.clone(this.allTerritories, clone.allTerritories);
+		this.id = clone.id;
+		this.territories = new ArrayList<>();
+		Territory.clone(this.territories, clone.territories, this);
 		this.continents = clone.continents;
-		SemiContinent.clone(this.semiContinents, clone.semiContinents);
+		this.semiContinents = new ArrayList<>();
+		SemiContinent.clone(this.semiContinents, clone.semiContinents, this);
 		this.bonusArmies = clone.bonusArmies;
 		this.searchExp = clone.searchExp;
 	}
 
-	public Agent(List<Continent> continents, List<Territory> allTerritories) {
+	public Agent(int id, List<Continent> continents, List<Territory> allTerritories) {
 		this.continents = continents;
 		this.allTerritories = allTerritories;
 		initSemiContinents();
 		territories = new ArrayList<>();
+		this.id = id;
 	}
 
-	public Agent(Agent enemy, List<Continent> continents, List<Territory> allTerritories) {
+	public Agent(int id, Agent enemy, List<Continent> continents, List<Territory> allTerritories) {
 		this.enemy = enemy;
 		this.continents = continents;
 		this.allTerritories = allTerritories;
 		initSemiContinents();
 		territories = new ArrayList<>();
+		this.id = id;
 	}
 
 	private void initSemiContinents() {
@@ -52,23 +57,25 @@ public class Agent {
 
 	public static Agent agentFactory(int id, Agent enemy, List<Continent> continents, List<Territory> allTerritories) {
 		if (id == 0)
-			return new Aggressive(enemy, continents, allTerritories);
+			return new Aggressive(0, enemy, continents, allTerritories);
 		else if (id == 1)
-			return new AStar(enemy, continents, allTerritories);
+			return new AStar(1, enemy, continents, allTerritories);
 		else if (id == 2)
-			return new Greedy(enemy, continents, allTerritories);
+			return new Greedy(2, enemy, continents, allTerritories);
 		else if (id == 3)
-			return new Human(enemy, continents, allTerritories);
+			return new Human(3, enemy, continents, allTerritories);
 		else if (id == 4)
-			return new Pacifist(enemy, continents, allTerritories);
+			return new Pacifist(4, enemy, continents, allTerritories);
 		else if (id == 5)
-			return new RtAStar(enemy, continents, allTerritories);
+			return new RtAStar(5, enemy, continents, allTerritories);
 		else
-			return new Passive(enemy, continents, allTerritories);
+			return new Passive(6, enemy, continents, allTerritories);
 	}
 
 	public void placeArmies() {
 		System.out.println("There are " + bonusArmies + " armies to place");
+		if (bonusArmies == 0)
+			return;
 	}
 
 	public void attack() {
@@ -104,6 +111,7 @@ public class Agent {
 	}
 
 	public void addTerritory(Territory territory) {
+		// System.out.println("adding to " + this.toString());
 		territories.add(territory);
 
 		SemiContinent semiContinent = semiContinents.get(territory.getContinent().getId());
@@ -115,8 +123,12 @@ public class Agent {
 		territories.remove(territory);
 
 		SemiContinent semiContinent = semiContinents.get(territory.getContinent().getId());
+		int oldDiff = semiContinent.getDiff();
 		semiContinent.removeTerritory(territory);
 		semiContinent.setDiff(semiContinent.getDiff() + 1);
+		if (oldDiff == 0) {
+			bonusArmies -= semiContinent.getValue();
+		}
 	}
 
 	public void setBonusArmies(int bonusArmies) {
@@ -136,6 +148,7 @@ public class Agent {
 	}
 
 	public void doAttack(Attack attack) {
+		// System.out.println("Do Attack " + attack);
 		attack.agentTerritory.setArmies(attack.agentTerritory.getArmies() - attack.attackArmies);
 		attack.enemyTerritory.setArmies(attack.attackArmies - attack.enemyTerritory.getArmies());
 
@@ -146,7 +159,7 @@ public class Agent {
 		attack.enemyTerritory.assignOwner(this);
 		addTerritory(attack.enemyTerritory);
 
-		bonusArmies += 2;
+		bonusArmies = 2;
 	}
 
 	public void doAttack(Territory agentTerritory, Territory enemyTerritory, int attackArmies) {
@@ -161,14 +174,23 @@ public class Agent {
 		addTerritory(enemyTerritory);
 
 		bonusArmies = 2;
-		addContBonus();
 	}
 
-	private void addContBonus() {
+	public void addContBonus() {
 		for (SemiContinent semiContinent : semiContinents) {
 			if (semiContinent.getDiff() == 0)
 				bonusArmies += semiContinent.getValue();
 		}
+	}
+
+	public boolean isWinner() {
+		for (SemiContinent semiContinent : semiContinents) {
+			if (semiContinent.getDiff() != 0) {
+				return false;
+			}
+		}
+		System.out.println("We have a winner " + this.toString());
+		return true;
 	}
 
 	public boolean gameOver() {
@@ -182,9 +204,23 @@ public class Agent {
 		return gameOver;
 	}
 
+	/*
+	 * not right ...................
+	 */
+	@Override
+	public boolean equals(Object obj) {
+		Agent aObj = (Agent) obj;
+		return listEqualsIgnoreOrder(territories, aObj.territories)
+				&& listEqualsIgnoreOrder(semiContinents, aObj.semiContinents);
+	}
+
+	public static <T> boolean listEqualsIgnoreOrder(List<T> list1, List<T> list2) {
+		return new HashSet<>(list1).equals(new HashSet<>(list2));
+	}
+
 	@Override
 	public String toString() {
-		String s = "Territories : " + territories + " ,, ";
+		String s = "Agent :" + "Territories : " + territories + " ,, ";
 		s += "Semicontinents : " + semiContinents;
 		return s;
 	}

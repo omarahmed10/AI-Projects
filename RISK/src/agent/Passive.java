@@ -15,16 +15,16 @@ import map.Territory;
 public class Passive extends Agent {
 
 
-	public Passive(Agent enemy, List<Continent> continents,
+	public Passive(int id, Agent enemy, List<Continent> continents,
 			List<Territory> allTerritories) {
-		super(enemy, continents, allTerritories);
+		super(id, enemy, continents, allTerritories);
 		// TODO Auto-generated constructor stub
 	}
 
 	@Override
 	public void placeArmies() {
 		super.placeArmies();
-
+		
 		Territory minTerritory = Collections.min(territories);
 		minTerritory.setArmies(bonusArmies + minTerritory.getArmies());
 		

@@ -13,33 +13,30 @@ import map.Territory;
 
 public class AStar extends Agent {
 
-	public AStar(Agent enemy, List<Continent> continents, List<Territory> allTerritories) {
-		super(enemy, continents, allTerritories);
+	public AStar(int id, Agent enemy, List<Continent> continents, List<Territory> allTerritories) {
+		super(id, enemy, continents, allTerritories);
 		// TODO Auto-generated constructor stub
 	}
 
 	private int h(AgentState x) {
 		int h = 0;
-		for (SemiContinent sc : x.agent.semiContinents) {
-			if (sc.getDiff() == 0) {
+		for (SemiContinent sc : x.aiAgent.semiContinents) {
+			if (sc.getDiff() != 0) {
 				h++;
 			}
 		}
 		return h;
 	}
 
+	// To be changed...................................
 	@Override
 	public void placeArmies() {
 		super.placeArmies();
 
-		if (bonusArmies == 0) {
-			return;
-		}
-
+		// searching for the territories which can't attack any neighbors.
 		Map<Territory, Integer> allAttacksMap = new HashMap<>();
 		for (Territory territory : territories) {
 			for (Territory neighbor : territory.getNeighbors()) {
-				// searching for the territories which can't attack any neighbors.
 				if (!territories.contains(neighbor) && (territory.getArmies() - neighbor.getArmies()) < 1) {
 					int value = 0;
 					if (allAttacksMap.containsKey(territory)) {
@@ -49,60 +46,73 @@ public class AStar extends Agent {
 				}
 			}
 		}
-		// let's sort this map by values first
-		// Map<Territory, Integer> sorted = allAttacksMap
-		// .entrySet()
-		// .stream()
-		// .sorted(comparingByValue())
-		// .collect(
-		// toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e2,
-		// LinkedHashMap::new));
-		Map.Entry<Territory, Integer> min = null;
+		// searching for the territories which have the max number of attacks which
+		// cannot be done.
+		// the most one in danger.
+		Map.Entry<Territory, Integer> max = null;
 		for (Map.Entry<Territory, Integer> entry : allAttacksMap.entrySet()) {
-			if (min == null || min.getValue() > entry.getValue()) {
-				min = entry;
+			if (max == null || max.getValue() < entry.getValue()) {
+				max = entry;
 			}
 		}
-		if (min != null) {
-			Territory theOne = min.getKey();
+		if (max != null) {
+			Territory theOne = max.getKey();
 			theOne.setArmies(theOne.getArmies() + bonusArmies);
 		}
+		bonusArmies = 0;
 	}
+
+	public Stack<AgentState> path = new Stack<>();
 
 	@Override
 	public void attack() {
 		super.attack();
+	}
 
+	public void buildPath(Agent agentPassive) {
 		PriorityQueue<AgentState> frontier = new PriorityQueue<>();
-		AgentState goalState = new AgentState();
-		AgentState initState = new AgentState(); // with null parent.
+		// this here is our A* agent whose territories are predefined from the initial
+		// position file
+		// and his enemy is preinitialized too.
+		AgentState initState = new AgentState(this, agentPassive, null);
+		initState.hx = h(initState);
 		Set<AgentState> explored = new HashSet<>();
 		frontier.add(initState);
-		while (!frontier.isEmpty()) {
-			AgentState currentState = frontier.poll();
-			explored.add(currentState);
-			if (currentState.equals(goalState)) {
-				Stack<AgentState> path = new Stack<>();
-				while (currentState.parent != null) {
-					path.push(currentState);
-					currentState = currentState.parent;
-				}
-				/// save that path...
+
+		// while (!frontier.isEmpty()) {
+		AgentState currentState = frontier.poll();
+		explored.add(currentState);
+
+		if (currentState.aiAgent.gameOver()) {
+			return;
+		}
+
+		System.out.println(currentState.toString());
+		if (currentState.aiAgent.isWinner()) {
+			while (currentState.parent != null) {
+				path.push(currentState);
+				currentState = currentState.parent;
 			}
-			for (AgentState neighbor : currentState.getNeighbors()) {
-				int new_hx = h(neighbor), new_gx = currentState.gx + 1;
-				if (frontier.contains(neighbor)) {
-					if (neighbor.fx() > new_hx + new_gx) {
-						frontier.remove(neighbor);
-					}
+			/// save that path...
+			return;
+		}
+
+		for (AgentState neighbor : currentState.getNeighbors()) {
+			int new_hx = h(neighbor), new_gx = currentState.gx + 1;
+			if (frontier.contains(neighbor)) {
+				if (neighbor.fx() > new_hx + new_gx) {
+					frontier.remove(neighbor);
 				}
-				if (!frontier.contains(neighbor) && !explored.contains(neighbor)) {
-					neighbor.hx = new_hx;
-					neighbor.gx = new_gx;
-					neighbor.parent = currentState;
-					frontier.add(neighbor);
-				}
+			}
+			if (!frontier.contains(neighbor) && !explored.contains(neighbor)) {
+				neighbor.hx = new_hx;
+				neighbor.gx = new_gx;
+				neighbor.parent = currentState;
+				System.out.println(neighbor);
+				frontier.add(neighbor);
 			}
 		}
+		System.out.println(currentState);
+		// }
 	}
 }
