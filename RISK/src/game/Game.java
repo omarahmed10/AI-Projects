@@ -70,7 +70,6 @@ public class Game {
 
 			agent.placeArmies();
 			agent.attack();
-			agent.addContBonus();
 
 			for (int i = 0; i < agents.length; i++) {
 				System.out.println("Agent " + (i + 1) + " info :");

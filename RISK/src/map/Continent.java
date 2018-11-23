@@ -13,7 +13,7 @@ public class Continent {
 		this.value = val;
 		territories = new ArrayList<>();
 	}
-
+	
 	public void addTerritory(Territory territory) {
 		territories.add(territory);
 	}
@@ -40,4 +40,5 @@ public class Continent {
 		s += ")";
 		return s;
 	}
+
 }

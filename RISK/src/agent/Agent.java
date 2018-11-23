@@ -1,7 +1,9 @@
 package agent;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import map.Continent;
 import map.SemiContinent;
@@ -16,8 +18,23 @@ public class Agent {
 	protected Agent enemy;
 	protected int searchExp;
 
-	public Agent(Agent enemy, List<Continent> continents,
-			List<Territory> allTerritories) {
+	public Agent(Agent clone) {
+		Territory.clone(this.territories, clone.territories);
+		Territory.clone(this.allTerritories, clone.allTerritories);
+		this.continents = clone.continents;
+		SemiContinent.clone(this.semiContinents, clone.semiContinents);
+		this.bonusArmies = clone.bonusArmies;
+		this.searchExp = clone.searchExp;
+	}
+
+	public Agent(List<Continent> continents, List<Territory> allTerritories) {
+		this.continents = continents;
+		this.allTerritories = allTerritories;
+		initSemiContinents();
+		territories = new ArrayList<>();
+	}
+
+	public Agent(Agent enemy, List<Continent> continents, List<Territory> allTerritories) {
 		this.enemy = enemy;
 		this.continents = continents;
 		this.allTerritories = allTerritories;
@@ -33,8 +50,7 @@ public class Agent {
 		}
 	}
 
-	public static Agent agentFactory(int id, Agent enemy,
-			List<Continent> continents, List<Territory> allTerritories) {
+	public static Agent agentFactory(int id, Agent enemy, List<Continent> continents, List<Territory> allTerritories) {
 		if (id == 0)
 			return new Aggressive(enemy, continents, allTerritories);
 		else if (id == 1)
@@ -56,7 +72,7 @@ public class Agent {
 	}
 
 	public void attack() {
-		
+
 	}
 
 	public List<Territory> possAttTerrs() {
@@ -64,8 +80,7 @@ public class Agent {
 
 		for (Territory territory : territories) {
 			for (Territory neighbor : territory.getNeighbors()) {
-				if (!territories.contains(neighbor)
-						&& (territory.getArmies() - neighbor.getArmies()) > 1
+				if (!territories.contains(neighbor) && (territory.getArmies() - neighbor.getArmies()) > 1
 						&& !possAttTerrs.contains(neighbor)) {
 					possAttTerrs.add(neighbor);
 				}
@@ -75,11 +90,23 @@ public class Agent {
 		return possAttTerrs;
 	}
 
+	public Set<Attack> possibleAttacks() {
+		Set<Attack> possAttaks = new HashSet<>();
+
+		for (Territory territory : territories) {
+			for (Territory neighbor : territory.getNeighbors()) {
+				if (!territories.contains(neighbor) && (territory.getArmies() - neighbor.getArmies()) > 1) {
+					possAttaks.add(new Attack(territory, neighbor, neighbor.getArmies() + 1));
+				}
+			}
+		}
+		return possAttaks;
+	}
+
 	public void addTerritory(Territory territory) {
 		territories.add(territory);
 
-		SemiContinent semiContinent = semiContinents
-				.get(territory.getContinent().getId());
+		SemiContinent semiContinent = semiContinents.get(territory.getContinent().getId());
 		semiContinent.addTerritory(territory);
 		semiContinent.setDiff(semiContinent.getDiff() - 1);
 	}
@@ -87,8 +114,7 @@ public class Agent {
 	public void removeTerritory(Territory territory) {
 		territories.remove(territory);
 
-		SemiContinent semiContinent = semiContinents
-				.get(territory.getContinent().getId());
+		SemiContinent semiContinent = semiContinents.get(territory.getContinent().getId());
 		semiContinent.removeTerritory(territory);
 		semiContinent.setDiff(semiContinent.getDiff() + 1);
 	}
@@ -109,22 +135,36 @@ public class Agent {
 		return semiContinents;
 	}
 
-	public void doAttack(Territory agentTerritory, Territory enemyTerritory,
-			int attackArmies) {
+	public void doAttack(Attack attack) {
+		attack.agentTerritory.setArmies(attack.agentTerritory.getArmies() - attack.attackArmies);
+		attack.enemyTerritory.setArmies(attack.attackArmies - attack.enemyTerritory.getArmies());
+
+		// May be the territory is neutral
+		if (attack.enemyTerritory.getOwner() != null)
+			attack.enemyTerritory.getOwner().removeTerritory(attack.enemyTerritory);
+
+		attack.enemyTerritory.assignOwner(this);
+		addTerritory(attack.enemyTerritory);
+
+		bonusArmies += 2;
+	}
+
+	public void doAttack(Territory agentTerritory, Territory enemyTerritory, int attackArmies) {
 		agentTerritory.setArmies(agentTerritory.getArmies() - attackArmies);
 		enemyTerritory.setArmies(attackArmies - enemyTerritory.getArmies());
-		
+
 		// May be the territory is neutral
 		if (enemyTerritory.getOwner() != null)
 			enemyTerritory.getOwner().removeTerritory(enemyTerritory);
-		
+
 		enemyTerritory.assignOwner(this);
 		addTerritory(enemyTerritory);
 
 		bonusArmies = 2;
+		addContBonus();
 	}
 
-	public void addContBonus() {
+	private void addContBonus() {
 		for (SemiContinent semiContinent : semiContinents) {
 			if (semiContinent.getDiff() == 0)
 				bonusArmies += semiContinent.getValue();

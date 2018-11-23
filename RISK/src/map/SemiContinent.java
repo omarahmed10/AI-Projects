@@ -1,5 +1,8 @@
 package map;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class SemiContinent extends Continent
 		implements Comparable<SemiContinent> {
 	// how much territory it needs to be a continent
@@ -8,6 +11,8 @@ public class SemiContinent extends Continent
 	public SemiContinent(int id, int val) {
 		super(id, val);
 	}
+	
+	
 
 	public void setDiff(int diff) {
 		this.diff = diff;
@@ -35,4 +40,18 @@ public class SemiContinent extends Continent
 		return 0;
 	}
 
+	public static void clone(List<SemiContinent> dest, List<SemiContinent> source){
+		dest = new ArrayList<>();
+		for(SemiContinent sc : source) {
+			SemiContinent scNew;
+			try {
+				scNew = (SemiContinent) sc.clone();
+				dest.add(scNew);
+			} catch (CloneNotSupportedException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+
+	
 }

@@ -18,6 +18,14 @@ public class Territory implements Comparable<Territory> {
 		this.neighbors = new ArrayList<>();
 	}
 
+	public Territory(Territory clone) {
+		this.id = clone.id;
+		this.armies = clone.armies;
+		this.continent = clone.continent;
+		this.owner = new Agent(clone.owner);
+		this.neighbors = clone.neighbors;
+	}
+
 	public void addNeighbor(Territory country) {
 		neighbors.add(country);
 	}
@@ -55,6 +63,11 @@ public class Territory implements Comparable<Territory> {
 	}
 
 	@Override
+	public boolean equals(Object obj) {
+		return id == ((Territory) obj).id;
+	}
+
+	@Override
 	public String toString() {
 		return "(id=" + (id + 1) + " , " + "armies=" + armies + ")";
 	}
@@ -79,5 +92,13 @@ public class Territory implements Comparable<Territory> {
 			return -1;
 
 		return 0;
+	}
+
+	public static void clone(List<Territory> dest, List<Territory> source) {
+		dest = new ArrayList<>();
+		for (Territory t : source) {
+			Territory newT = new Territory(t);
+			dest.add(newT);
+		}
 	}
 }
