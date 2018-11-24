@@ -21,10 +21,13 @@ public class Passive extends Agent {
 		// TODO Auto-generated constructor stub
 	}
 
+	public Passive(Agent clone) {
+		super(clone);
+	}
+	
 	@Override
 	public void placeArmies() {
 		super.placeArmies();
-		
 		Territory minTerritory = Collections.min(territories);
 		minTerritory.setArmies(bonusArmies + minTerritory.getArmies());
 		

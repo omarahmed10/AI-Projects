@@ -18,6 +18,10 @@ public class AStar extends Agent {
 		// TODO Auto-generated constructor stub
 	}
 
+	public AStar(Agent clone) {
+		super(clone);
+	}
+
 	private int h(AgentState x) {
 		int h = 0;
 		for (SemiContinent sc : x.aiAgent.semiContinents) {
@@ -32,7 +36,6 @@ public class AStar extends Agent {
 	@Override
 	public void placeArmies() {
 		super.placeArmies();
-
 		// searching for the territories which can't attack any neighbors.
 		Map<Territory, Integer> allAttacksMap = new HashMap<>();
 		for (Territory territory : territories) {
@@ -79,40 +82,33 @@ public class AStar extends Agent {
 		Set<AgentState> explored = new HashSet<>();
 		frontier.add(initState);
 
-		// while (!frontier.isEmpty()) {
-		AgentState currentState = frontier.poll();
-		explored.add(currentState);
+		while (!frontier.isEmpty()) {
+			AgentState currentState = frontier.poll();
+			explored.add(currentState);
 
-		if (currentState.aiAgent.gameOver()) {
-			return;
-		}
-
-		System.out.println(currentState.toString());
-		if (currentState.aiAgent.isWinner()) {
-			while (currentState.parent != null) {
-				path.push(currentState);
-				currentState = currentState.parent;
+			if (currentState.aiAgent.isWinner()) {
+				while (currentState != null) {
+					path.push(currentState);
+					currentState = currentState.parent;
+				}
+				/// save that path...
+				return;
 			}
-			/// save that path...
-			return;
-		}
 
-		for (AgentState neighbor : currentState.getNeighbors()) {
-			int new_hx = h(neighbor), new_gx = currentState.gx + 1;
-			if (frontier.contains(neighbor)) {
-				if (neighbor.fx() > new_hx + new_gx) {
-					frontier.remove(neighbor);
+			for (AgentState neighbor : currentState.getNeighbors()) {
+				int new_hx = h(neighbor), new_gx = currentState.gx + 1;
+				if (frontier.contains(neighbor)) {
+					if (neighbor.fx() > new_hx + new_gx) {
+						frontier.remove(neighbor);
+					}
+				}
+				if (!frontier.contains(neighbor) && !explored.contains(neighbor)) {
+					neighbor.hx = new_hx;
+					neighbor.gx = new_gx;
+					neighbor.parent = currentState;
+					frontier.add(neighbor);
 				}
 			}
-			if (!frontier.contains(neighbor) && !explored.contains(neighbor)) {
-				neighbor.hx = new_hx;
-				neighbor.gx = new_gx;
-				neighbor.parent = currentState;
-				System.out.println(neighbor);
-				frontier.add(neighbor);
-			}
 		}
-		System.out.println(currentState);
-		// }
 	}
 }

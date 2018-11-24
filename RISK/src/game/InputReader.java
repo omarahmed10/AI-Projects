@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
+import javafx.util.Pair;
 import map.Continent;
 import map.Territory;
 
@@ -14,7 +15,8 @@ public class InputReader {
 	private int numTerritory, numEdges, numPartitions;
 	private String[] splited;
 	String line;
-	private List<Territory> territories;
+	public List<Territory> territories;
+	public List<Pair<Integer, Integer>> edges;
 	private List<Continent> continents;
 
 	public InputReader(String fileName) {
@@ -48,6 +50,7 @@ public class InputReader {
 		line = br.readLine();
 		splited = line.split("\\s+");
 		numEdges = Integer.parseInt(splited[1]);
+		edges = new ArrayList<>();
 		for (int i = 0; i < numEdges; i++) {
 			line = br.readLine();
 			line = line.replace("(", "");
@@ -55,6 +58,7 @@ public class InputReader {
 			splited = line.split("\\s+");
 			int V1 = Integer.parseInt(splited[0]) - 1;
 			int V2 = Integer.parseInt(splited[1]) - 1;
+			edges.add(new Pair<Integer, Integer>(V1, V2));
 			territories.get(V1).addNeighbor(territories.get(V2));
 			territories.get(V2).addNeighbor(territories.get(V1));
 			System.out.println("Edge " + V1 + " , " + V2 + " is added");
@@ -73,8 +77,7 @@ public class InputReader {
 			int val = scanner.nextInt();
 			continents.add(new Continent(i, val));
 
-			System.out.print("Continent " + i + " is added " + "with value " + val
-					+ " and its members ");
+			System.out.print("Continent " + i + " is added " + "with value " + val + " and its members ");
 
 			// the territories numvber in a continent may vary
 			while (scanner.hasNextInt()) {
@@ -82,7 +85,7 @@ public class InputReader {
 				continents.get(i).addTerritory(territories.get(terrId));
 				System.out.print(terrId + " ");
 			}
-			
+
 			System.out.println();
 
 			scanner.close();

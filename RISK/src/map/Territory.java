@@ -23,7 +23,7 @@ public class Territory implements Comparable<Territory> {
 		this.armies = clone.armies;
 		this.continent = clone.continent;
 		this.owner = owner;
-		this.neighbors = clone.neighbors;
+		this.neighbors = new ArrayList<>();
 	}
 
 	public void addNeighbor(Territory country) {
@@ -65,8 +65,7 @@ public class Territory implements Comparable<Territory> {
 	@Override
 	public boolean equals(Object obj) {
 		Territory tObj = (Territory) obj;
-		System.out.println((id == tObj.id) + " " + (armies == tObj.armies) + " " + (owner.id + " " + tObj.id));
-		return id == tObj.id && armies == tObj.armies && owner.id == tObj.id;
+		return id == tObj.id && armies == tObj.armies && owner.id == tObj.owner.id;
 	}
 
 	@Override

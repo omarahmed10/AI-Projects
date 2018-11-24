@@ -7,12 +7,15 @@ import java.util.Scanner;
 
 import agent.AStar;
 import agent.Agent;
+import javafx.util.Pair;
 import map.Continent;
 import map.Territory;
 
 public class AIGame {
+	static InputReader ir;
+
 	public static void main(String[] args) {
-		InputReader ir = new InputReader("input.txt");
+		ir = new InputReader("input.txt");
 		List<Territory> allTerritories = ir.getTerritories();
 		List<Continent> continents = ir.getContinents();
 		for (Continent continent : continents) {
@@ -25,11 +28,9 @@ public class AIGame {
 		System.out.println(allTerritories);
 		System.out.print("cont : ");
 		System.out.println(continents);
-		
-		AStar agentAI = (AStar) Agent.agentFactory(1, null, continents,
-				allTerritories);
-		Agent agentPassive = Agent.agentFactory(6, agentAI, continents,
-				allTerritories);
+
+		AStar agentAI = (AStar) Agent.agentFactory(1, null, continents, allTerritories);
+		Agent agentPassive = Agent.agentFactory(6, agentAI, continents, allTerritories);
 		agentAI.setEnemy(agentPassive);
 		Agent[] agents = new Agent[] { agentAI, agentPassive };
 
@@ -46,8 +47,8 @@ public class AIGame {
 		System.out.println(agentAI.path);
 
 	}
-	public static void intialPlace(String filePath,
-			List<Territory> allTerritories, Agent[] agents) {
+
+	public static void intialPlace(String filePath, List<Territory> allTerritories, Agent[] agents) {
 		try {
 			Scanner scanner = new Scanner(new File(filePath));
 			int terrNum = scanner.nextInt();
@@ -69,6 +70,15 @@ public class AIGame {
 			scanner.close();
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
+		}
+	}
+
+	public static void buildNeighbors(List<Territory> all) {
+		for (Pair<Integer, Integer> pair : ir.edges) {
+			Territory V1 = all.get(pair.getKey());
+			Territory V2 = all.get(pair.getValue());
+			V1.addNeighbor(V2);
+			V2.addNeighbor(V1);
 		}
 	}
 }

@@ -1,8 +1,11 @@
 package agent;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
+import game.AIGame;
 import map.Territory;
 
 public class AgentState implements Comparable<AgentState> {
@@ -20,9 +23,23 @@ public class AgentState implements Comparable<AgentState> {
 	}
 
 	public AgentState(AgentState clone) {
-		this.aiAgent = new Agent(clone.aiAgent);
-		this.passiveAggent = new Agent(clone.passiveAggent);
+		this.aiAgent = Agent.agentFactory(clone.aiAgent);
+		this.passiveAggent = Agent.agentFactory(clone.passiveAggent);
 		this.aiAgent.enemy = this.passiveAggent;
+		List<Territory> all = new ArrayList<>(this.passiveAggent.territories);
+		all.addAll(this.aiAgent.territories);
+		Collections.sort(all, new Comparator<Territory>() {
+			@Override
+			public int compare(Territory o1, Territory o2) {
+				if (o1.getId() > o2.getId())
+					return 1;
+				if (o1.getId() < o2.getId())
+					return -1;
+				return 0;
+			}
+
+		});
+		AIGame.buildNeighbors(all);
 		this.gx = clone.gx;
 		this.hx = clone.hx;
 		this.parent = clone.parent;
@@ -40,31 +57,24 @@ public class AgentState implements Comparable<AgentState> {
 		for (Attack attack : aiAgent.possibleAttacks()) {
 			AgentState newNeighbour = new AgentState(this);
 			newNeighbour.attack = getAttack(attack, newNeighbour);
-			newNeighbour.aiAgent.doAttack(attack);
+			newNeighbour.aiAgent.doAttack(newNeighbour.attack);
 			newNeighbour.aiAgent.addContBonus();
 			newNeighbour.aiAgent.enemy.addContBonus();
 			neighbours.add(newNeighbour);
 		}
-		System.out.println("Done with getNeighbours");
 		return neighbours;
 	}
 
 	private Attack getAttack(Attack attack, AgentState newState) {
 		Attack newAttack = new Attack();
-		System.out.println("AGENT: "+attack.agentTerritory);
 		for (Territory t : newState.aiAgent.territories) {
-			System.out.println(t);
 			if (t.equals(attack.agentTerritory)) {
-				System.out.println("FOUND agent");
 				newAttack.agentTerritory = t;
 				break;
 			}
 		}
-		System.out.println("ENEMY: "+attack.enemyTerritory);
 		for (Territory t : newState.passiveAggent.territories) {
-			System.out.println(t);
 			if (t.equals(attack.enemyTerritory)) {
-				System.out.println("FOUND enemy");
 				newAttack.enemyTerritory = t;
 				break;
 			}
