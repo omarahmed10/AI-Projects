@@ -5,8 +5,8 @@ import java.io.FileNotFoundException;
 import java.util.List;
 import java.util.Scanner;
 
-import agent.AStar;
 import agent.Agent;
+import agent.Greedy;
 import javafx.util.Pair;
 import map.Continent;
 import map.Territory;
@@ -29,7 +29,7 @@ public class AIGame {
 		System.out.print("cont : ");
 		System.out.println(continents);
 
-		AStar agentAI = (AStar) Agent.agentFactory(1, null, continents, allTerritories);
+        Greedy agentAI = (Greedy) Agent.agentFactory(2, null, continents, allTerritories);
 		Agent agentPassive = Agent.agentFactory(6, agentAI, continents, allTerritories);
 		agentAI.setEnemy(agentPassive);
 		Agent[] agents = new Agent[] { agentAI, agentPassive };

@@ -8,7 +8,7 @@ import map.Territory;
 
 /*
  *  A passive agent never attacks, and always places all its additional
- *  armies on the vertex that has the fewest armies, breaking ties by 
+ *  armies on the vertex that has the fewest armies, breaking ties by
  *  favoring the lowest-numbered vertex.
  * */
 
@@ -24,13 +24,14 @@ public class Passive extends Agent {
 	public Passive(Agent clone) {
 		super(clone);
 	}
-	
+
 	@Override
 	public void placeArmies() {
-		super.placeArmies();
+        if (bonusArmies <= 0)
+            return;
 		Territory minTerritory = Collections.min(territories);
 		minTerritory.setArmies(bonusArmies + minTerritory.getArmies());
-		
+
 		bonusArmies = 0;
 	}
 }

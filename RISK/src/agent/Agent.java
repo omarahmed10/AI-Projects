@@ -58,10 +58,14 @@ public class Agent {
 	public static Agent agentFactory(Agent clone) {
 		if (clone.id == 1)
 			return new AStar(clone);
+        else if (clone.id == 2)
+            return new Greedy(clone);
+        else if (clone.id == 3)
+            return new RtAStar(clone);
 		else
 			return new Passive(clone);
 	}
-	
+
 	public static Agent agentFactory(int id, Agent enemy, List<Continent> continents, List<Territory> allTerritories) {
 		if (id == 0)
 			return new Aggressive(0, enemy, continents, allTerritories);
@@ -80,9 +84,7 @@ public class Agent {
 	}
 
 	public void placeArmies() {
-		System.out.println("There are " + bonusArmies + " armies to place");
-		if (bonusArmies <= 0)
-			return;
+
 	}
 
 	public void attack() {
@@ -126,12 +128,12 @@ public class Agent {
 
 	public void removeTerritory(Territory territory) {
 		territories.remove(territory);
-		
+
 		SemiContinent semiContinent = semiContinents.get(territory.getContinent().getId());
 		int oldDiff = semiContinent.getDiff();
 		semiContinent.removeTerritory(territory);
 		semiContinent.setDiff(semiContinent.getDiff() + 1);
-		
+
 		if (oldDiff == 0 && bonusArmies > 0) {
 			bonusArmies -= semiContinent.getValue();
 		}
@@ -157,12 +159,12 @@ public class Agent {
 		// May be the territory is neutral
 		if (attack.enemyTerritory.getOwner() != null)
 			attack.enemyTerritory.getOwner().removeTerritory(attack.enemyTerritory);
-		
+
 		attack.agentTerritory.setArmies(attack.agentTerritory.getArmies() - attack.attackArmies);
 		attack.enemyTerritory.setArmies(attack.attackArmies - attack.enemyTerritory.getArmies());
 		attack.enemyTerritory.assignOwner(this);
 		addTerritory(attack.enemyTerritory);
-		
+
 		bonusArmies = 2;
 	}
 
@@ -193,7 +195,6 @@ public class Agent {
 				return false;
 			}
 		}
-		System.out.println("We have a winner " + this.toString());
 		return true;
 	}
 
@@ -213,7 +214,7 @@ public class Agent {
 	 */
 	@Override
 	public boolean equals(Object obj) {
-		System.out.println("ASDJFASDFKNASDFNKASDFIKNASDFINASDF");
+
 		Agent aObj = (Agent) obj;
 		return listEqualsIgnoreOrder(territories, aObj.territories)
 				&& listEqualsIgnoreOrder(semiContinents, aObj.semiContinents);
@@ -225,8 +226,9 @@ public class Agent {
 
 	@Override
 	public String toString() {
-		String s = "Agent :" + "Territories : " + territories + " ,, ";
-		s += "Semicontinents : " + semiContinents + " ,, Bonus :"+ bonusArmies;
+        String s = "Agent : " + "Territories : " + territories + " ,, ";
+        s += "\nAgent: Semicontinents : " + semiContinents + ",,Bonus :" + bonusArmies
+                + "\n";
 		return s;
 	}
 
