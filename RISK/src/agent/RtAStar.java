@@ -92,41 +92,37 @@ public class RtAStar extends Agent {
 
     public void buildPath(Agent agentPassive) {
         PriorityQueue<AgentState> frontier = new PriorityQueue<>();
-        // this here is our A* agent whose territories are predefined from the
-        // initial
-        // position file
-        // and his enemy is preinitialized too.
         AgentState initState = new AgentState(this, agentPassive, null);
         initState.hx = h(initState);
         Set<AgentState> explored = new HashSet<>();
         frontier.add(initState);
-        AgentState StarterState = null;
+        AgentState lastExplored = null;
         while (!frontier.isEmpty()) {
             AgentState currentState = frontier.poll();
             explored.add(currentState);
 
             if (currentState.aiAgent.isWinner()) {
-                while (currentState != StarterState) {
+                while (!currentState.equals(lastExplored)) {
                     path.push(currentState);
                     currentState = currentState.parent;
                 }
                 /// save that path...
                 return;
             }
-
-            if (currentState.gx > 5) {
-                if (frontier.isEmpty() || currentState.hx <= frontier.peek().hx) {
-                    frontier.clear();
-                    while (currentState != StarterState) {
-                        path.push(currentState);
-                        currentState = currentState.parent;
-                    }
-                    System.out.println(path);
-                    path.clear();
-                    StarterState = currentState;
+            // Pruning
+            for (AgentState s : frontier) {
+                if (s.gx < currentState.gx && s.hx > currentState.hx) {
+                    frontier.remove(s);
                 }
             }
-
+            if (frontier.isEmpty()) {
+                AgentState actionState = new AgentState(currentState);
+                while (actionState != lastExplored) {
+                    path.push(currentState);
+                    actionState = actionState.parent;
+                }
+                lastExplored = new AgentState(currentState);
+            }
             for (AgentState neighbor : currentState.getNeighbors()) {
                 int new_hx = h(neighbor), new_gx = currentState.gx + 1;
                 if (frontier.contains(neighbor)) {

@@ -60,7 +60,7 @@ public class Agent {
 			return new AStar(clone);
         else if (clone.id == 2)
             return new Greedy(clone);
-        else if (clone.id == 3)
+        else if (clone.id == 5)
             return new RtAStar(clone);
 		else
 			return new Passive(clone);
