@@ -83,12 +83,16 @@ public class Agent {
 			return new Passive(6, enemy, continents, allTerritories);
 	}
 
-	public void placeArmies() {
-
+	public ArmyPlacement placeArmies() {
+		return null;
 	}
 
 	public void attack() {
 
+	}
+	
+	public Action move() {
+		return null;
 	}
 
 	public List<Territory> possAttTerrs() {

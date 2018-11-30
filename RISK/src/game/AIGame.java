@@ -2,9 +2,12 @@ package game;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Scanner;
 
+import agent.AStar;
 import agent.Agent;
 import agent.RtAStar;
 import javafx.util.Pair;
@@ -29,7 +32,7 @@ public class AIGame {
 		System.out.print("cont : ");
 		System.out.println(continents);
 
-        RtAStar agentAI = (RtAStar) Agent.agentFactory(5, null, continents, allTerritories);
+        AStar agentAI = (AStar) Agent.agentFactory(1, null, continents, allTerritories);
 		Agent agentPassive = Agent.agentFactory(6, agentAI, continents, allTerritories);
 		agentAI.setEnemy(agentPassive);
 		Agent[] agents = new Agent[] { agentAI, agentPassive };
@@ -74,6 +77,17 @@ public class AIGame {
 	}
 
 	public static void buildNeighbors(List<Territory> all) {
+		Collections.sort(all, new Comparator<Territory>() {
+            @Override
+            public int compare(Territory o1, Territory o2) {
+                if (o1.getId() > o2.getId())
+                    return 1;
+                if (o1.getId() < o2.getId())
+                    return -1;
+                return 0;
+            }
+
+        });
 		for (Pair<Integer, Integer> pair : ir.edges) {
 			Territory V1 = all.get(pair.getKey());
 			Territory V2 = all.get(pair.getValue());

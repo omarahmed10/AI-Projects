@@ -35,9 +35,10 @@ public class Greedy extends Agent {
 
     // Most Damage
     @Override
-    public void placeArmies() {
+    public ArmyPlacement placeArmies() {
         if (bonusArmies <= 0)
-            return;
+            return null;
+        
         // searching for the territories which can do the most damage.
         Map<Territory, Integer> allAttacksMap = new HashMap<>();
         for (Territory territory : territories) {
@@ -76,11 +77,19 @@ public class Greedy extends Agent {
                 max = entry;
             }
         }
-        if (max != null) {
-            Territory theOne = max.getKey();
-            theOne.setArmies(theOne.getArmies() + bonusArmies);
-        }
-        bonusArmies = 0;
+        ArmyPlacement ap = null;
+		if (max != null) {
+			Territory theOne = max.getKey();
+			theOne.setArmies(theOne.getArmies() + bonusArmies);
+			
+			ap = new ArmyPlacement();
+			ap.terrID = theOne.getId();
+			ap.armyCount = theOne.getArmies();
+			ap.bonusAdded = bonusArmies;
+		}
+		bonusArmies = 0;
+		
+		return ap;
     }
 
     public Stack<AgentState> path = new Stack<>();

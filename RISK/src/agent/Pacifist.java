@@ -20,13 +20,21 @@ public class Pacifist extends Agent {
 	}
 
 	@Override
-	public void placeArmies() {
-		super.placeArmies();
-
+	public ArmyPlacement placeArmies() {
+		if(bonusArmies <= 0)
+			return null;
+		
 		Territory minTerritory = Collections.min(territories);
 		minTerritory.setArmies(bonusArmies + minTerritory.getArmies());
-
+		
+		ArmyPlacement ap = new ArmyPlacement();
+		ap.terrID = minTerritory.getId();
+		ap.armyCount = minTerritory.getArmies();
+		ap.bonusAdded = bonusArmies;
+		
 		bonusArmies = 0;
+		
+		return ap;
 	}
 
 	@Override

@@ -20,14 +20,12 @@ public class Human extends Agent {
 	private Scanner scanner = new Scanner(System.in);
 
 	@Override
-	public void placeArmies() {
-		super.placeArmies();
-
+	public ArmyPlacement placeArmies() {
 		if (bonusArmies == 0)
-			return;
+			return null;
 
 		boolean wrongId = true;
-
+		ArmyPlacement ap = null;
 		while (wrongId) {
 			System.out.print(
 					"Enter id of the territory you want to place the armies in : ");
@@ -39,6 +37,12 @@ public class Human extends Agent {
 				if (territory.getId() == territoryId) {
 					territory.setArmies(territory.getArmies() + bonusArmies);
 					wrongId = false;
+					
+					ap = new ArmyPlacement();
+					ap.terrID = territory.getId();
+					ap.armyCount = territory.getArmies();
+					ap.bonusAdded = bonusArmies;
+					
 					break;
 				}
 			}
@@ -48,6 +52,8 @@ public class Human extends Agent {
 		}
 
 		bonusArmies = 0;
+		
+		return ap;
 	}
 
 	@Override

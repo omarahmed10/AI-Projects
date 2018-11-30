@@ -65,7 +65,7 @@ public class Territory implements Comparable<Territory> {
 	@Override
 	public boolean equals(Object obj) {
 		Territory tObj = (Territory) obj;
-		return id == tObj.id && armies == tObj.armies && owner.id == tObj.owner.id;
+		return id == tObj.id ;// && armies == tObj.armies && owner.id == tObj.owner.id;
 	}
 
 	@Override

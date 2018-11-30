@@ -22,13 +22,21 @@ public class Aggressive extends Agent {
 	}
 
 	@Override
-	public void placeArmies() {
-		super.placeArmies();
+	public ArmyPlacement placeArmies() {
 
+		if(bonusArmies <= 0)
+			return null;
+		
 		Territory maxTerritory = Collections.max(territories);
 		maxTerritory.setArmies(bonusArmies + maxTerritory.getArmies());
 
+		ArmyPlacement ap = new ArmyPlacement();
+		ap.terrID = maxTerritory.getId();
+		ap.armyCount = maxTerritory.getArmies();
+		ap.bonusAdded = bonusArmies;
+		
 		bonusArmies = 0;
+		return ap;
 	}
 
 	@Override
