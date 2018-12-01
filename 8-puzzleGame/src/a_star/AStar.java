@@ -95,11 +95,12 @@ public class AStar {
 		}
 
 		Stack<State> finalPath = new Stack<State>();
+		float pathCost = 0;
 		while (finalState != null) {
+			pathCost += finalState.getCost();
 			finalPath.push(finalState);
 			finalState = finalState.parent;
 		}
-		int pathCost = finalPath.size();
 		while (!finalPath.isEmpty()) {
 			System.out.println(finalPath.pop());
 			System.out.println("-----");
@@ -155,11 +156,12 @@ public class AStar {
 		}
 
 		Stack<State> finalPath = new Stack<State>();
+		float pathCost = 0;
 		while (finalState != null) {
+			pathCost += finalState.getCost();
 			finalPath.push(finalState);
 			finalState = finalState.parent;
 		}
-		int pathCost = finalPath.size();
 		while (!finalPath.isEmpty()) {
 			System.out.println(finalPath.pop());
 			System.out.println("-----");
