@@ -48,37 +48,8 @@ public class Main {
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-		
-		System.out.println("\n>>>>>>>>>>>>> A star Search with Eclidean Heuristics");
-		Path aStarESearchPath = AStar.searchWithEclidean(parent, goal);
-		if (aStarESearchPath == null)
-			System.out.println("could't reach the goal");
-		else {
-			for (State s : aStarESearchPath.getStates()) {
-				System.out.println(s);
-				System.out.println("-----");
-			}
-			System.out.println("cost of path = " + aStarESearchPath.getCost());
-			System.out.println("search depth = " + AStar.MaxDepth);
-		}
-		long aStarEEndTime = System.currentTimeMillis();
-		System.out.println("Time taken = " + (aStarEEndTime - dfsEndTime) + " ms");
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-		System.out.println("\n>>>>>>>>>>>>> A star Search Manhattan Heuristics");
-		Path aStarMSearchPath = AStar.searchWithManhattan(parent, goal);
-		if (aStarMSearchPath == null)
-			System.out.println("could't reach the goal");
-		else {
-			for (State s : aStarMSearchPath.getStates()) {
-				System.out.println(s);
-				System.out.println("-----");
-			}
-			System.out.println("cost of path = " + aStarMSearchPath.getCost());
-			System.out.println("search depth = " + AStar.MaxDepth);
-		}
-		long aStarMEndTime = System.currentTimeMillis();
-		System.out.println("Time taken = " + (aStarMEndTime - aStarEEndTime) + " ms");
+		AStar astar = new AStar();
+		astar.AStarSearchEuclidean(parent, goal);
+		astar.AStarSearchManhattan(parent, goal);
 	}
 }

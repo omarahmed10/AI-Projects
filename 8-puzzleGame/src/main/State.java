@@ -11,6 +11,7 @@ public class State {
 	private List<State> neighbors;
 	private float cost;
 	
+	public int g;
 	public State parent;
 
 	private State(int[][] puzzle) {

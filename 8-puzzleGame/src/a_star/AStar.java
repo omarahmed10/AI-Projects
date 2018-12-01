@@ -1,17 +1,17 @@
 package a_star;
 
-import main.Path;
+import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.HashSet;
+import java.util.List;
 import java.util.PriorityQueue;
-import java.util.Set;
+import java.util.Stack;
 
 import main.State;
 
 public class AStar {
-	private static int size = 3;
+	int size = 3;
 
-	public static float manhattanScore(State state, State goal) {
+	public float manhattanScore(State state, State goal) {
 		float cost = 0;
 		for (int i = 0; i < size; i++) {
 			for (int j = 0; j < size; j++) {
@@ -30,7 +30,7 @@ public class AStar {
 		return cost;
 	}
 
-	public static float euclideanScore(State state, State goal) {
+	public float euclideanScore(State state, State goal) {
 		float cost = 0;
 		for (int i = 0; i < size; i++) {
 			for (int j = 0; j < size; j++) {
@@ -49,78 +49,133 @@ public class AStar {
 		return cost;
 	}
 
-	public static int MaxDepth = 0;
-	
-	public static Path searchWithEclidean(State initState, State goalState) {
-		MaxDepth = 0;
-		PriorityQueue<Path> frontier = new PriorityQueue<>(new Comparator<Path>() {
+	public void AStarSearchManhattan(State initial, State goal) {
+		long startTime = System.currentTimeMillis();
+
+		int depth = 0;
+
+		initial.g = 0;
+		initial.parent = null;
+		PriorityQueue<State> frontier = new PriorityQueue<>(new Comparator<State>() {
 			@Override
-			public int compare(Path p1, Path p2) {
-				if (p1.lastState().getCost() < p2.lastState().getCost())
+			public int compare(State s1, State s2) {
+				if (s1.getCost() < s2.getCost())
 					return -1;
-				if (p1.lastState().getCost() > p2.lastState().getCost())
+				if (s1.getCost() > s2.getCost())
 					return 1;
 				return 0;
 			}
 		});
-		initState.setCost(euclideanScore(initState, goalState));
-		Set<State> explored = new HashSet<>();
-		Path initPath = new Path(initState);
-		frontier.add(initPath);
+		initial.setCost(manhattanScore(initial, goal));
+		frontier.add(initial);
+
+		List<State> explored = new ArrayList<>();
+
+		State finalState = null;
 		while (!frontier.isEmpty()) {
-			Path path = frontier.poll();
-			State currentState = path.lastState();
-			explored.add(currentState);
-			if (currentState.equals(goalState)) {
-				return path;
+			State state = frontier.poll();
+			explored.add(state);
+
+			if (state.equals(goal)) {
+				finalState = state;
+				break;
 			}
-			for (State neighbor : currentState.getNeighbors()) {
-				if (!frontier.contains(new Path(neighbor)) && !explored.contains(neighbor)) {
-					neighbor.setCost(euclideanScore(neighbor, goalState));
-					Path newPath = new Path(path);
-					newPath.addState(neighbor);
-					MaxDepth = Math.max(MaxDepth, newPath.getCost());
-					frontier.add(newPath);
+
+			List<State> neighbors = state.getNeighbors();
+
+			for (State neighbor : neighbors) {
+				if (!frontier.contains(neighbor) && !explored.contains(neighbor)) {
+					neighbor.g = state.g + 1;
+					depth = Math.max(depth, neighbor.g);
+					neighbor.parent = state;
+					neighbor.setCost(manhattanScore(neighbor, goal));
+					frontier.add(neighbor);
 				}
 			}
 		}
-		return null;
+
+		Stack<State> finalPath = new Stack<State>();
+		while (finalState != null) {
+			finalPath.push(finalState);
+			finalState = finalState.parent;
+		}
+		int pathCost = finalPath.size();
+		while (!finalPath.isEmpty()) {
+			System.out.println(finalPath.pop());
+			System.out.println("-----");
+		}
+		System.out.println("Time taken = " + (System.currentTimeMillis() - startTime));
+		System.out.println("Path cost = " + pathCost);
+		System.out.println("Path depth = " + depth);
+
 	}
-	
-	public static Path searchWithManhattan(State initState, State goalState) {
-		MaxDepth = 0;
-		PriorityQueue<Path> frontier = new PriorityQueue<>(new Comparator<Path>() {
+
+	public void AStarSearchEuclidean(State initial, State goal) {
+		long startTime = System.currentTimeMillis();
+
+		int depth = 0;
+
+		initial.g = 0;
+		initial.parent = null;
+		PriorityQueue<State> frontier = new PriorityQueue<>(new Comparator<State>() {
 			@Override
-			public int compare(Path p1, Path p2) {
-				if (p1.lastState().getCost() < p2.lastState().getCost())
+			public int compare(State s1, State s2) {
+				if (s1.getCost() < s2.getCost())
 					return -1;
-				if (p1.lastState().getCost() > p2.lastState().getCost())
+				if (s1.getCost() > s2.getCost())
 					return 1;
 				return 0;
 			}
 		});
-		initState.setCost(manhattanScore(initState, goalState));
-		Set<State> explored = new HashSet<>();
-		Path initPath = new Path(initState);
-		frontier.add(initPath);
+		initial.setCost(manhattanScore(initial, goal));
+		frontier.add(initial);
+
+		List<State> explored = new ArrayList<>();
+
+		State finalState = null;
 		while (!frontier.isEmpty()) {
-			Path path = frontier.poll();
-			State currentState = path.lastState();
-			explored.add(currentState);
-			if (currentState.equals(goalState)) {
-				return path;
+			State state = frontier.poll();
+			explored.add(state);
+
+			if (state.equals(goal)) {
+				finalState = state;
+				break;
 			}
-			for (State neighbor : currentState.getNeighbors()) {
-				if (!frontier.contains(new Path(neighbor)) && !explored.contains(neighbor)) {
-					neighbor.setCost(manhattanScore(neighbor, goalState));
-					Path newPath = new Path(path);
-					newPath.addState(neighbor);
-					MaxDepth = Math.max(MaxDepth, newPath.getCost());
-					frontier.add(newPath);
+			List<State> neighbors = state.getNeighbors();
+
+			for (State neighbor : neighbors) {
+				if (!frontier.contains(neighbor) && !explored.contains(neighbor)) {
+					neighbor.g = state.g + 1;
+					depth = Math.max(depth, neighbor.g);
+					neighbor.parent = state;
+					neighbor.setCost(euclideanScore(neighbor, goal));
+					frontier.add(neighbor);
 				}
 			}
 		}
-		return null;
+
+		Stack<State> finalPath = new Stack<State>();
+		while (finalState != null) {
+			finalPath.push(finalState);
+			finalState = finalState.parent;
+		}
+		int pathCost = finalPath.size();
+		while (!finalPath.isEmpty()) {
+			System.out.println(finalPath.pop());
+			System.out.println("-----");
+		}
+		System.out.println("Time taken = " + (System.currentTimeMillis() - startTime));
+		System.out.println("Path cost = " + pathCost);
+		System.out.println("Path depth = " + depth);
+
 	}
-	
+
+	public static void main(String[] args) {
+		AStar astar = new AStar();
+		State initial = new State(new int[] { 1, 4, 5, 3, 2, 0, 7, 6, 8 });
+		State goal = new State(new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8 });
+
+		astar.AStarSearchEuclidean(initial, goal);
+		astar.AStarSearchManhattan(initial, goal);
+	}
 }

@@ -1,11 +1,11 @@
 package bfs;
 
-import main.Path;
-import java.util.HashSet;
+import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Queue;
-import java.util.Set;
 
+import main.Path;
 import main.State;
 
 public class BFS {
@@ -14,7 +14,7 @@ public class BFS {
 	public static Path search(State initState, State goalState) {
 		MaxDepth = 0;
 		Queue<Path> frontier = new LinkedList<>();
-		Set<State> explored = new HashSet<State>();
+		List<State> explored = new ArrayList<State>();
 		Path initPath = new Path(initState);
 		frontier.add(initPath);
 		while (!frontier.isEmpty()) {
