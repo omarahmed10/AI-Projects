@@ -14,37 +14,38 @@ import map.Territory;
 
 public class Pacifist extends Agent {
 
-	public Pacifist(int id, Agent enemy, List<Continent> continents,
-			List<Territory> allTerritories) {
+	public Pacifist(int id, Agent enemy, List<Continent> continents, List<Territory> allTerritories) {
 		super(id, enemy, continents, allTerritories);
 	}
 
 	@Override
 	public ArmyPlacement placeArmies() {
-		if(bonusArmies <= 0)
+		if (bonusArmies <= 0)
 			return null;
-		
+
 		Territory minTerritory = Collections.min(territories);
 		minTerritory.setArmies(bonusArmies + minTerritory.getArmies());
-		
+
 		ArmyPlacement ap = new ArmyPlacement();
 		ap.terrID = minTerritory.getId();
 		ap.armyCount = minTerritory.getArmies();
 		ap.bonusAdded = bonusArmies;
-		
+
 		bonusArmies = 0;
-		
+
 		return ap;
 	}
 
 	@Override
-	public void attack() {
+	public Attack attack() {
 		List<Territory> possAttTerrs = possAttTerrs();
 
 		if (possAttTerrs.isEmpty()) {
 			System.out.println("No territory can be attacked!");
-			return;
+			return null;
 		}
+
+		Attack attack = null;
 
 		Territory minTerritory = Collections.min(possAttTerrs);
 
@@ -55,10 +56,15 @@ public class Pacifist extends Agent {
 
 			if (territories.contains(neighbor)) {
 				// attack with least armies
-				doAttack(neighbor, minTerritory, minTerritory.getArmies() + 1);
+				attack = new Attack();
+				attack.agentTerritory = neighbor;
+				attack.enemyTerritory = minTerritory;
+				attack.attackArmies = minTerritory.getArmies() + 1;
+				doAttack(attack);
 				break;
 			}
 		}
+		return null;
 	}
 
 }

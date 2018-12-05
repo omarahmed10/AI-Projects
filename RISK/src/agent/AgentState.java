@@ -9,7 +9,7 @@ import game.AIGame;
 import gui.MainScreen;
 import map.Territory;
 
-public class AgentState implements Comparable<AgentState> {
+public class AgentState {
     protected Agent aiAgent;
     protected Agent passiveAggent;
     protected int gx = 0; // cost to reach state.
@@ -90,15 +90,6 @@ public class AgentState implements Comparable<AgentState> {
         String s = "gx =" + gx + " hx =" + hx + "\n" + "Agent State : AI" + aiAgent.toString() + "\n" + "Passive "
                 + aiAgent.enemy.toString() + a + "\n\n";
         return s;
-    }
-
-    @Override
-    public int compareTo(AgentState o) {
-        if (fx() > o.fx())
-            return 1;
-        if (fx() < o.fx())
-            return -1;
-        return 0;
     }
 
 }

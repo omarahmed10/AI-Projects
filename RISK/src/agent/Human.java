@@ -12,8 +12,7 @@ import map.Territory;
 
 public class Human extends Agent {
 
-	public Human(int id, Agent enemy, List<Continent> continents,
-			List<Territory> allTerritories) {
+	public Human(int id, Agent enemy, List<Continent> continents, List<Territory> allTerritories) {
 		super(id, enemy, continents, allTerritories);
 	}
 
@@ -27,8 +26,7 @@ public class Human extends Agent {
 		boolean wrongId = true;
 		ArmyPlacement ap = null;
 		while (wrongId) {
-			System.out.print(
-					"Enter id of the territory you want to place the armies in : ");
+			System.out.print("Enter id of the territory you want to place the armies in : ");
 			int territoryId = scanner.nextInt() - 1;
 
 			// If the agent owns this territory , then assign the armies.
@@ -37,12 +35,12 @@ public class Human extends Agent {
 				if (territory.getId() == territoryId) {
 					territory.setArmies(territory.getArmies() + bonusArmies);
 					wrongId = false;
-					
+
 					ap = new ArmyPlacement();
 					ap.terrID = territory.getId();
 					ap.armyCount = territory.getArmies();
 					ap.bonusAdded = bonusArmies;
-					
+
 					break;
 				}
 			}
@@ -52,12 +50,12 @@ public class Human extends Agent {
 		}
 
 		bonusArmies = 0;
-		
+
 		return ap;
 	}
 
 	@Override
-	public void attack() {
+	public Attack attack() {
 
 		while (true) {
 
@@ -65,15 +63,14 @@ public class Human extends Agent {
 
 			if (possAttTerrs.isEmpty()) {
 				System.out.println("No territory can be attacked!");
-				return;
+				return null;
 			}
 
-			System.out.print(
-					"Enter ids of the territory you want to attack with, the attacked one and\n"
-							+ "number of armies you want to attack with seperated (Enter -1 to skip) : ");
+			System.out.print("Enter ids of the territory you want to attack with, the attacked one and\n"
+					+ "number of armies you want to attack with seperated (Enter -1 to skip) : ");
 			int agentTerritoryId = scanner.nextInt() - 1;
 			if (agentTerritoryId == -1)
-				return;
+				return null;
 			int enemyTerritoryId = scanner.nextInt() - 1;
 			int attackArmies = scanner.nextInt();
 
@@ -87,29 +84,30 @@ public class Human extends Agent {
 			}
 
 			// enemy territory must be attackable & must be neighbor to the agent's
-			if (!possAttTerrs.contains(enemyTerritory)
-					|| !agentTerritory.getNeighbors().contains(enemyTerritory)) {
+			if (!possAttTerrs.contains(enemyTerritory) || !agentTerritory.getNeighbors().contains(enemyTerritory)) {
 				System.out.println("You can't attack this territory!");
 				continue;
 			}
 
 			// agent territory armies must be larger than the attack's by at least 1
 			if (agentTerritory.getArmies() - attackArmies < 1) {
-				System.out.println(
-						"Agent territory armies not larger than the attack's by at least 1!");
+				System.out.println("Agent territory armies not larger than the attack's by at least 1!");
 				continue;
 			}
 
 			// attack armies must be larger than the enemy's by at least 1
 			if (attackArmies - enemyTerritory.getArmies() < 1) {
-				System.out.println(
-						"Attack armies not larger than the enemy's by at least 1!");
+				System.out.println("Attack armies not larger than the enemy's by at least 1!");
 				continue;
 			}
 
 			// Do the attack
-			doAttack(agentTerritory, enemyTerritory, attackArmies);
-			break;
+			Attack attack = new Attack();
+			attack.agentTerritory = agentTerritory;
+			attack.enemyTerritory = enemyTerritory;
+			attack.attackArmies = attackArmies;
+			doAttack(attack);
+			return attack;
 		}
 	}
 }

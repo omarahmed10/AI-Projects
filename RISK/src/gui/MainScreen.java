@@ -30,10 +30,13 @@ import org.graphstream.ui.view.ViewerPipe;
 import agent.AStar;
 import agent.Action;
 import agent.Agent;
+import agent.ArmyPlacement;
+import agent.Attack;
 import game.InputReader;
 import javafx.util.Pair;
 import map.Continent;
 import map.Territory;
+import sun.management.resources.agent;
 
 public class MainScreen extends JFrame implements ViewerListener {
 
@@ -83,57 +86,16 @@ public class MainScreen extends JFrame implements ViewerListener {
 	static Graph graph;
 	static Agent[] agents;
 	static JLabel announcement;
-
-	public MainScreen(JFrame parent) {
-		initGraph();
-
-		ir = new InputReader("input.txt");
-		allTerritories = ir.getTerritories();
-		continents = ir.getContinents();
-		for (Continent continent : continents) {
-			for (Territory territory : continent.getTerritories()) {
-				territory.setContinent(continent);
-			}
-		}
-
-		AStar agentAI = (AStar) Agent.agentFactory(1, null, continents, allTerritories);
-		Agent agentPassive = Agent.agentFactory(6, agentAI, continents, allTerritories);
-		agentAI.setEnemy(agentPassive);
-		agents = new Agent[] { agentAI, agentPassive };
-
-		intialPlace("initialPlacement.txt", allTerritories, agents);
-
-		for (int i = 0; i < agents.length; i++) {
-			System.out.println("Agent " + (i + 1) + " info :");
-			System.out.println(agents[i]);
-		}
-		System.out.println();
-
-		buildGraph();
-
-		parent.add(new Toolbar(graph), BorderLayout.EAST);
-		Viewer viewer = graph.display();
-		ViewPanel graphView = viewer.getDefaultView();
-		// viewer.disableAutoLayout();
-		// new MainScreen(viewer,graph);
-
-		// view.getCamera().setViewPercent(0.5);
-		parent.add(graphView, BorderLayout.CENTER);
-
-		announcement = new JLabel("RISK br3et Abo shimaa ..OK");
-		announcement.setHorizontalAlignment(SwingConstants.CENTER);
-		announcement.setFont(announcement.getFont().deriveFont(30.0f));
-		parent.add(announcement, BorderLayout.PAGE_START);
-
-		sleep(5);
-		System.out.println("starting the Game");
-		announcement.setText("Starting the Game");
-		agentAI.buildPath(agentPassive);
-		startAIGame();
-	}
+	static Map<String, Integer> agentIDS = new HashMap<>();
 
 	public static void main(String[] args) {
-
+		agentIDS.put("Aggresive", 0);
+		agentIDS.put("Astar", 1);
+		agentIDS.put("Greedy", 2);
+		agentIDS.put("Human", 3);
+		agentIDS.put("Pacifist", 4);
+		agentIDS.put("RTAstar", 5);
+		agentIDS.put("Passive", 6);
 		JFrame frame = new JFrame("RISK");
 		try {
 			for (LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
@@ -160,12 +122,7 @@ public class MainScreen extends JFrame implements ViewerListener {
 			}
 		}
 
-		AStar agentAI = (AStar) Agent.agentFactory(1, null, continents, allTerritories);
-		Agent agentPassive = Agent.agentFactory(6, agentAI, continents, allTerritories);
-		agentAI.setEnemy(agentPassive);
-		agents = new Agent[] { agentAI, agentPassive };
-
-		intialPlace("initialPlacement.txt", allTerritories, agents);
+		intialPlace("initialPlacement.txt", allTerritories);
 
 		for (int i = 0; i < agents.length; i++) {
 			System.out.println("Agent " + (i + 1) + " info :");
@@ -184,7 +141,7 @@ public class MainScreen extends JFrame implements ViewerListener {
 		// view.getCamera().setViewPercent(0.5);
 		frame.add(graphView, BorderLayout.CENTER);
 
-		announcement = new JLabel("RISK br3et Abo shimaa ..OK");
+		announcement = new JLabel("");
 		announcement.setHorizontalAlignment(SwingConstants.CENTER);
 		announcement.setFont(announcement.getFont().deriveFont(30.0f));
 		frame.add(announcement, BorderLayout.PAGE_START);
@@ -192,16 +149,59 @@ public class MainScreen extends JFrame implements ViewerListener {
 		frame.setSize(700, 700);
 		frame.setVisible(true);
 
-		sleep(5);
-		System.out.println("starting the Game");
-		announcement.setText("Starting the Game");
-		agentAI.buildPath(agentPassive);
-		startAIGame();
+		makeAnnouncment("Starting the Game");
+		sleep(2);
+
+		if (agents[0].id == 1 || agents[0].id == 2 || agents[0].id == 5)
+			startAIGame();
+		else
+			startGame();
+	}
+
+	private static void startGame() {
+		boolean haveingAWinner = false;
+		int agentId = 1;
+		int maxGameTurns = (int) Math.pow(allTerritories.size(), 2);
+		int turnCount = 0;
+
+		while (!haveingAWinner && turnCount++ < maxGameTurns) {
+			makeAnnouncment("Agent " + agentId + " Turn");
+			sleep(2);
+
+			Agent agent = agents[agentId - 1];
+
+			Action action = agent.move();
+
+			if (action != null) {
+				System.out.println("still in the game " + action);
+				long threadId = Thread.currentThread().getId();
+				System.out.println("Thread # " + threadId + " is doing this task");
+
+				// placing armies for AI player.
+				placeArmies(action.agentPlacement);
+
+				// making attack
+				showAttack(action.attack);
+			} else {
+				makeAnnouncment("no Action for Agent " + agentId);
+				sleep(2);
+			}
+			haveingAWinner = agent.isWinner();
+			if (haveingAWinner)
+				makeAnnouncment("It's all over , player " + agentId + " Won!");
+
+			if (agentId == 1)
+				agentId = 2;
+			else
+				agentId = 1;
+		}
 
 	}
 
 	private static void startAIGame() {
 		Agent ai = agents[0];
+		ai.buildPath(agents[1]);
+		boolean haveingAWinner = false;
 
 		while (!ai.gameOver() && !ai.isWinner()) {
 			Action action = ai.move();
@@ -209,65 +209,92 @@ public class MainScreen extends JFrame implements ViewerListener {
 			if (action == null)
 				break; // Game End
 			System.out.println("still in the game " + action);
+			long threadId = Thread.currentThread().getId();
+			System.out.println("Thread # " + threadId + " is doing this task");
 
 			// placing armies for Passive player.
-			if (action.passivePlacement != null && action.passivePlacement.terrID >= 0) {
-				announcement.setText("adding " + action.passivePlacement.bonusAdded + " bonus for "
-						+ (action.passivePlacement.terrID + 1));
-				System.out.println("adding " + action.passivePlacement.bonusAdded + " bonus for "
-						+ (action.passivePlacement.terrID + 1));
-
-				graph.getNode((action.passivePlacement.terrID + 1) + "").addAttribute("ui.style", "text-color:yellow;");
-				graph.getNode((action.passivePlacement.terrID + 1) + "").changeAttribute("ui.label",
-						(action.passivePlacement.terrID + 1) + "_" + action.passivePlacement.armyCount);
-				sleep(5);
-				graph.getNode((action.passivePlacement.terrID + 1) + "").addAttribute("ui.style", "text-color:black;");
-			}
+			placeArmies(action.passivePlacement);
 
 			// placing armies for AI player.
-			if (action.agentPlacement != null && action.agentPlacement.terrID >= 0) {
-				announcement.setText("adding " + action.agentPlacement.bonusAdded + " bonus for "
-						+ (action.agentPlacement.terrID + 1));
-				System.out.println("adding " + action.agentPlacement.bonusAdded + " bonus for "
-						+ (action.agentPlacement.terrID + 1));
-
-				graph.getNode((action.agentPlacement.terrID + 1) + "").addAttribute("ui.style", "text-color:yellow;");
-				graph.getNode((action.agentPlacement.terrID + 1) + "").changeAttribute("ui.label",
-						(action.agentPlacement.terrID + 1) + "_" + action.agentPlacement.armyCount);
-				graph.getNode((action.agentPlacement.terrID + 1) + "").addAttribute("ui.style", "text-color:black;");
-				sleep(5);
-			}
+			placeArmies(action.agentPlacement);
 
 			// making attack
-			if (action.attack != null && action.attack.agentTerritory != null && action.attack.enemyTerritory != null) {
-				String edgeID = (action.attack.agentTerritory.getId() + 1) + ""
-						+ (action.attack.enemyTerritory.getId() + 1);
-				Edge e = graph.getEdge(edgeID);
-				if (e == null) {
-					edgeID = (action.attack.enemyTerritory.getId() + 1) + ""
-							+ (action.attack.agentTerritory.getId() + 1);
-					e = graph.getEdge(edgeID);
-				}
-				announcement.setText("attacking " + (action.attack.enemyTerritory.getId() + 1) + " from "
-						+ (action.attack.agentTerritory.getId() + 1) + " using " + action.attack.attackArmies
-						+ " armies");
-				System.out.println("attacking " + (action.attack.enemyTerritory.getId() + 1) + " from "
-						+ (action.attack.agentTerritory.getId() + 1) + " using " + action.attack.attackArmies
-						+ " armies");
-				e.changeAttribute("ui.style", "fill-color: yellow;shape: cubic-curve; size:2px;");
-				graph.getNode((action.attack.agentTerritory.getId() + 1) + "").changeAttribute("ui.label",
-						(action.attack.agentTerritory.getId() + 1) + "_"
-								+ (action.attack.agentTerritory.getArmies() - action.attack.attackArmies));
-				graph.getNode((action.attack.enemyTerritory.getId() + 1) + "").changeAttribute("ui.label",
-						(action.attack.enemyTerritory.getId() + 1) + "_"
-								+ (action.attack.attackArmies - action.attack.enemyTerritory.getArmies()));
-				graph.getNode((action.attack.enemyTerritory.getId() + 1) + "").changeAttribute("ui.style",
-						"fill-color: white,blue;");
-				sleep(5);
-				e.changeAttribute("ui.style", "shape: cubic-curve; size:2px; fill-color: black;");
-			}
-			sleep(5);
+			makeAttack(action.attack);
+
+			haveingAWinner = ai.isWinner();
+			if (haveingAWinner)
+				makeAnnouncment("It's all over , AI Won!");
+
 		}
+	}
+
+	private static void placeArmies(ArmyPlacement placement) {
+		if (placement != null && placement.terrID >= 0) {
+			makeAnnouncment("adding " + placement.bonusAdded + " bonus for " + (placement.terrID + 1));
+
+			graph.getNode((placement.terrID + 1) + "").addAttribute("ui.style", "text-color:yellow;");
+			graph.getNode((placement.terrID + 1) + "").changeAttribute("ui.label",
+					(placement.terrID + 1) + "_" + placement.armyCount);
+			sleep(5);
+			graph.getNode((placement.terrID + 1) + "").addAttribute("ui.style", "text-color:black;");
+		}
+	}
+
+	private static void showAttack(Attack attack) {
+		if (attack != null && attack.agentTerritory != null && attack.enemyTerritory != null) {
+			int enemyTerrID = attack.enemyTerritory.getId() + 1, agetTerrID = attack.agentTerritory.getId() + 1;
+			Edge e = findEdge(agetTerrID, enemyTerrID);
+			if (e == null)
+				return;
+
+			makeAnnouncment(
+					"attacking " + enemyTerrID + " from " + agetTerrID + " using " + attack.attackArmies + " armies");
+
+			e.changeAttribute("ui.style", "fill-color: yellow;shape: cubic-curve; size:2px;");
+			graph.getNode(agetTerrID + "").changeAttribute("ui.label",
+					agetTerrID + "_" + attack.agentTerritory.getArmies());
+			graph.getNode(enemyTerrID + "").changeAttribute("ui.label",
+					enemyTerrID + "_" + attack.enemyTerritory.getArmies());
+			graph.getNode(enemyTerrID + "").changeAttribute("ui.style", "fill-color: white,blue;");
+			sleep(5);
+			e.changeAttribute("ui.style", "shape: cubic-curve; size:2px; fill-color: black;");
+		}
+	}
+
+	private static void makeAttack(Attack attack) {
+		if (attack != null && attack.agentTerritory != null && attack.enemyTerritory != null) {
+			int enemyTerrID = attack.enemyTerritory.getId() + 1, agetTerrID = attack.agentTerritory.getId() + 1;
+			Edge e = findEdge(agetTerrID, enemyTerrID);
+			if (e == null)
+				return;
+
+			makeAnnouncment(
+					"attacking " + enemyTerrID + " from " + agetTerrID + " using " + attack.attackArmies + " armies");
+
+			e.changeAttribute("ui.style", "fill-color: yellow;shape: cubic-curve; size:2px;");
+			graph.getNode(agetTerrID + "").changeAttribute("ui.label",
+					agetTerrID + "_" + (attack.agentTerritory.getArmies() - attack.attackArmies));
+			graph.getNode(enemyTerrID + "").changeAttribute("ui.label",
+					enemyTerrID + "_" + (attack.attackArmies - attack.enemyTerritory.getArmies()));
+			graph.getNode(enemyTerrID + "").changeAttribute("ui.style", "fill-color: white,blue;");
+			sleep(5);
+			e.changeAttribute("ui.style", "shape: cubic-curve; size:2px; fill-color: black;");
+		}
+	}
+
+	private static Edge findEdge(int from, int to) {
+		String edgeID = from + "" + to;
+		Edge e = graph.getEdge(edgeID);
+		if (e == null) {
+			edgeID = to + "" + from;
+			e = graph.getEdge(edgeID);
+		}
+		return e;
+	}
+
+	private static void makeAnnouncment(String text) {
+		announcement.setText(text);
+		System.out.println(text);
 	}
 
 	static void initGraph() {
@@ -281,11 +308,19 @@ public class MainScreen extends JFrame implements ViewerListener {
 		graph.addAttribute("ui.antialias");
 	}
 
-	public static void intialPlace(String filePath, List<Territory> allTerritories, Agent[] agents) {
+	public static void intialPlace(String filePath, List<Territory> allTerritories) {
 		try {
 			Scanner scanner = new Scanner(new File(filePath));
+			int playerCount = scanner.nextInt();
+			agents = new Agent[playerCount];
+			for (int i = 0; i < playerCount; i++) {
+				int agentID = agentIDS.get(scanner.next());
+				agents[i] = Agent.agentFactory(agentID, null, continents, allTerritories);
+				if (i > 0) {
+					agents[i - 1].setEnemy(agents[i]);
+				}
+			}
 			int terrNum = scanner.nextInt();
-
 			for (int i = 0; i < terrNum; i++) {
 				int terrId = scanner.nextInt();
 				int armies = scanner.nextInt();

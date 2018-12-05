@@ -5,6 +5,8 @@ import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.Toolkit;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.SwingConstants;
 import javax.swing.UIManager;
 import javax.swing.UIManager.LookAndFeelInfo;
 
@@ -14,6 +16,7 @@ public class RiskGame extends JFrame {
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
+	private static JLabel announcement;
 
 	/**
 	 * Launch the application.
@@ -46,6 +49,7 @@ public class RiskGame extends JFrame {
 	 * @throws InterruptedException
 	 */
 	private void initialize() {
+		setTitle("Risk");
 		try {
 			for (LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
 				if ("Nimbus".equals(info.getName())) {
@@ -57,12 +61,23 @@ public class RiskGame extends JFrame {
 			System.out.println("Can not set look and feel");
 		}
 		setLayout(new BorderLayout());
-		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-		setSize(screenSize.width, screenSize.height);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-		Intro intro = new Intro(this);
-		intro.setSize(getWidth(), getHeight());
-		add(intro,BorderLayout.CENTER);
+		add(new Intro(this), BorderLayout.EAST);
+
+		announcement = new JLabel("");
+		announcement.setHorizontalAlignment(SwingConstants.CENTER);
+		announcement.setFont(announcement.getFont().deriveFont(30.0f));
+		add(announcement, BorderLayout.PAGE_START);
+
+		setSize(700, 700);
+		setVisible(true);
+
+		makeAnnouncment("Choose Agents");
+	}
+	
+	public static void makeAnnouncment(String text) {
+		announcement.setText(text);
+		System.out.println(text);
 	}
 }

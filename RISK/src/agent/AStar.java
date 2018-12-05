@@ -1,11 +1,11 @@
 package agent;
 
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.PriorityQueue;
-import java.util.Set;
 import java.util.Stack;
 
 import map.Continent;
@@ -14,16 +14,10 @@ import map.Territory;
 
 public class AStar extends Agent {
 
-	private boolean pathCreated = false;
-
 	public AStar(int id, Agent enemy, List<Continent> continents, List<Territory> allTerritories) {
 		super(id, enemy, continents, allTerritories);
 		// TODO Auto-generated constructor stub
 
-		if (enemy != null) {
-			pathCreated = true;
-			buildPath(enemy);
-		}
 	}
 
 	public AStar(Agent clone) {
@@ -31,29 +25,9 @@ public class AStar extends Agent {
 	}
 
 	@Override
-	public Action move() {
-		if (path == null || path.isEmpty())
-			return null;
-		
-		AgentState state = path.pop();
-		Action action = new Action();
-		action.agentPlacement = state.agentPlacement;
-		action.passivePlacement = state.passivePlacement;
-		
-		if (!path.isEmpty()) {
-			Attack a = AgentState.getAttack(path.peek().attack, state);
-			System.out.println(a);
-			action.attack = a;
-		}
-		return action;
-	}
-
-	@Override
 	public void setEnemy(Agent enemy) {
 		super.setEnemy(enemy);
 
-		if (!pathCreated)
-			buildPath(enemy);
 	}
 
 	private int h(AgentState x) {
@@ -66,12 +40,30 @@ public class AStar extends Agent {
 		return h;
 	}
 
+	@Override
+	public Action move() {
+		if (path == null || path.isEmpty())
+			return null;
+
+		AgentState state = path.pop();
+		Action action = new Action();
+		action.agentPlacement = state.agentPlacement;
+		action.passivePlacement = state.passivePlacement;
+
+		if (!path.isEmpty()) {
+			Attack a = AgentState.getAttack(path.peek().attack, state);
+			System.out.println(a);
+			action.attack = a;
+		}
+		return action;
+	}
+
 	// Most Damage
 	@Override
 	public ArmyPlacement placeArmies() {
 		if (bonusArmies <= 0)
 			return null;
-		
+
 		// searching for the territories which can do the most damage.
 		Map<Territory, Integer> allAttacksMap = new HashMap<>();
 		for (Territory territory : territories) {
@@ -114,32 +106,37 @@ public class AStar extends Agent {
 		if (max != null) {
 			Territory theOne = max.getKey();
 			theOne.setArmies(theOne.getArmies() + bonusArmies);
-			
+
 			ap = new ArmyPlacement();
 			ap.terrID = theOne.getId();
 			ap.armyCount = theOne.getArmies();
 			ap.bonusAdded = bonusArmies;
 		}
 		bonusArmies = 0;
-		
+
 		return ap;
 	}
 
 	public Stack<AgentState> path = new Stack<>();
 
 	@Override
-	public void attack() {
-		super.attack();
-	}
-
 	public void buildPath(Agent agentPassive) {
-		PriorityQueue<AgentState> frontier = new PriorityQueue<>();
+		PriorityQueue<AgentState> frontier = new PriorityQueue<>(new Comparator<AgentState>() {
+			@Override
+			public int compare(AgentState o1, AgentState o2) {
+				if (o1.fx() > o2.fx())
+		            return 1;
+		        if (o1.fx() < o2.fx())
+		            return -1;
+				return 0;
+			}
+		});
 		// this here is our A* agent whose territories are predefined from the initial
 		// position file
 		// and his enemy is preinitialized too.
 		AgentState initState = new AgentState(this, agentPassive, null);
 		initState.hx = h(initState);
-		Set<AgentState> explored = new HashSet<>();
+		List<AgentState> explored = new ArrayList<>();
 		frontier.add(initState);
 
 		while (!frontier.isEmpty()) {
@@ -171,5 +168,10 @@ public class AStar extends Agent {
 				}
 			}
 		}
+	}
+	
+	@Override
+	public boolean solutionFound() {
+		return path != null && !path.isEmpty();
 	}
 }

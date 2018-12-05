@@ -87,14 +87,23 @@ public class Agent {
 		return null;
 	}
 
-	public void attack() {
-
+	public Attack attack() {
+		return null;
 	}
 	
 	public Action move() {
 		return null;
 	}
 
+	public void buildPath(Agent agent) {
+		// TODO Auto-generated method stub
+		
+	}
+	
+	public boolean solutionFound() {
+		return false;
+	}
+	
 	public List<Territory> possAttTerrs() {
 		List<Territory> possAttTerrs = new ArrayList<>();
 

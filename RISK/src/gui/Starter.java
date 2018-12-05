@@ -136,7 +136,8 @@ public class Starter extends JPanel {
      * event listeners registered on the JList, JComboBox, or JRadioButtons all
      * call this method.
      */
-    protected void select(int selection) {
+    @SuppressWarnings("deprecation")
+	protected void select(int selection) {
         this.selection = selection; // Store the new selected index
         if (this.selection == 4 || this.selection == 5 || this.selection == 6) {
             this.getOtherPlayer().list.disable();
@@ -155,7 +156,8 @@ public class Starter extends JPanel {
         }
     }
  
-    private void setLabels() {
+    @SuppressWarnings("deprecation")
+	private void setLabels() {
         if (this.selection == 4 || this.selection == 5 || this.selection == 6) {
             this.getOtherPlayer().list.disable();
         }

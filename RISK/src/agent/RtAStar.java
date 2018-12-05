@@ -1,11 +1,11 @@
 package agent;
 
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.PriorityQueue;
-import java.util.Set;
 import java.util.Stack;
 
 import map.Continent;
@@ -13,7 +13,6 @@ import map.SemiContinent;
 import map.Territory;
 
 public class RtAStar extends Agent {
-	private boolean pathCreated = false;
 
 	public RtAStar(int id, Agent enemy, List<Continent> continents, List<Territory> allTerritories) {
 		super(id, enemy, continents, allTerritories);
@@ -38,13 +37,31 @@ public class RtAStar extends Agent {
 		return h;
 	}
 
+	@Override
+	public Action move() {
+		if (path == null || path.isEmpty())
+			return null;
+
+		AgentState state = path.pop();
+		Action action = new Action();
+		action.agentPlacement = state.agentPlacement;
+		action.passivePlacement = state.passivePlacement;
+
+		if (!path.isEmpty()) {
+			Attack a = AgentState.getAttack(path.peek().attack, state);
+			System.out.println(a);
+			action.attack = a;
+		}
+		return action;
+	}
+
 	// Most Damage
 	@Override
 	public ArmyPlacement placeArmies() {
-		
+
 		if (bonusArmies <= 0)
 			return null;
-		
+
 		// searching for the territories which can do the most damage.
 		Map<Territory, Integer> allAttacksMap = new HashMap<>();
 		for (Territory territory : territories) {
@@ -87,29 +104,33 @@ public class RtAStar extends Agent {
 		if (max != null) {
 			Territory theOne = max.getKey();
 			theOne.setArmies(theOne.getArmies() + bonusArmies);
-			
+
 			ap = new ArmyPlacement();
 			ap.terrID = theOne.getId();
 			ap.armyCount = theOne.getArmies();
 			ap.bonusAdded = bonusArmies;
 		}
 		bonusArmies = 0;
-		
+
 		return ap;
 	}
 
 	public Stack<AgentState> path = new Stack<>();
 
-	@Override
-	public void attack() {
-		super.attack();
-	}
-
 	public void buildPath(Agent agentPassive) {
-		PriorityQueue<AgentState> frontier = new PriorityQueue<>();
+		PriorityQueue<AgentState> frontier = new PriorityQueue<>(new Comparator<AgentState>() {
+			@Override
+			public int compare(AgentState o1, AgentState o2) {
+				if (o1.fx() > o2.fx())
+					return 1;
+				if (o1.fx() < o2.fx())
+					return -1;
+				return 0;
+			}
+		});
 		AgentState initState = new AgentState(this, agentPassive, null);
 		initState.hx = h(initState);
-		Set<AgentState> explored = new HashSet<>();
+		List<AgentState> explored = new ArrayList<>();
 		frontier.add(initState);
 		AgentState lastExplored = null;
 		while (!frontier.isEmpty()) {
@@ -153,5 +174,10 @@ public class RtAStar extends Agent {
 				}
 			}
 		}
+	}
+	
+	@Override
+	public boolean solutionFound() {
+		return path != null && !path.isEmpty();
 	}
 }
