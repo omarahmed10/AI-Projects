@@ -25,7 +25,7 @@ public class Greedy extends Agent {
 
 	private int h(AgentState x) {
 		int h = 0;
-		for (SemiContinent sc : x.aiAgent.semiContinents) {
+		for (SemiContinent sc : x.aiAgent.semiContinents.values()) {
 			if (sc.getDiff() != 0) {
 				h++;
 			}
@@ -160,5 +160,10 @@ public class Greedy extends Agent {
 				}
 			}
 		}
+	}
+	
+	@Override
+	public boolean solutionFound() {
+		return path != null && !path.isEmpty();
 	}
 }

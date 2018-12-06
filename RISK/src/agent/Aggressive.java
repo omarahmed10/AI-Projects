@@ -1,5 +1,6 @@
 package agent;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -26,7 +27,7 @@ public class Aggressive extends Agent {
 		action.agentPlacement = placeArmies();
 		action.attack = attack();
 		addContBonus();
-		return action;
+		return action.agentPlacement == null && action.attack == null ? null : action;
 	}
 
 	@Override
@@ -57,7 +58,7 @@ public class Aggressive extends Agent {
 		}
 
 		Attack attack = null;
-		List<SemiContinent> enemySemiConts = enemy.getSemiContinents();
+		List<SemiContinent> enemySemiConts = new ArrayList<>(enemy.getSemiContinents().values());
 		Collections.sort(enemySemiConts);
 
 		Collections.sort(possAttTerrs);

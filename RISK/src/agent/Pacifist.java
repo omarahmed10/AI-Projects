@@ -37,6 +37,15 @@ public class Pacifist extends Agent {
 	}
 
 	@Override
+	public Action move() {
+		Action action = new Action();
+		action.agentPlacement = placeArmies();
+		action.attack = attack();
+		addContBonus();
+		return action.agentPlacement == null && action.attack == null ? null : action;
+	}
+	
+	@Override
 	public Attack attack() {
 		List<Territory> possAttTerrs = possAttTerrs();
 

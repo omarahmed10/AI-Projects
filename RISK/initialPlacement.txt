@@ -1,6 +1,6 @@
 2
-Aggresive
-Pacifist
+Greedy
+Passive
 4
 1 4 1
 2 1 1
@@ -13,3 +13,6 @@ player_id  agentType  #note player one assumed to be the AI agent in case of AI 
 number_of_territories 
 terrId	armies	agentId
 agentId = 1 (agent1) & 2 (agent2)
+
+Agent types :
+Aggresive - Astar - Greedy - Human - Pacifist - RTAstar - Passive

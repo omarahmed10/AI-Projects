@@ -29,7 +29,7 @@ public class Passive extends Agent {
 		action.agentPlacement = placeArmies();
 		action.attack = attack();
 		addContBonus();
-		return action;
+		return action.agentPlacement == null && action.attack == null ? null : action;
 	}
 
 	@Override

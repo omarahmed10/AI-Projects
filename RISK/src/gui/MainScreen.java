@@ -27,7 +27,6 @@ import org.graphstream.ui.view.Viewer;
 import org.graphstream.ui.view.ViewerListener;
 import org.graphstream.ui.view.ViewerPipe;
 
-import agent.AStar;
 import agent.Action;
 import agent.Agent;
 import agent.ArmyPlacement;
@@ -36,7 +35,16 @@ import game.InputReader;
 import javafx.util.Pair;
 import map.Continent;
 import map.Territory;
-import sun.management.resources.agent;
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
 
 public class MainScreen extends JFrame implements ViewerListener {
 
@@ -48,47 +56,17 @@ public class MainScreen extends JFrame implements ViewerListener {
 	static InputReader ir;
 	protected static boolean loop = true;
 
-	public MainScreen(Viewer viewer, Graph graph) {
-		// The default action when closing the view is to quit
-		// the program.
-		viewer.setCloseFramePolicy(Viewer.CloseFramePolicy.HIDE_ONLY);
-
-		// We connect back the viewer to the graph,
-		// the graph becomes a sink for the viewer.
-		// We also install us as a viewer listener to
-		// intercept the graphic events.
-		ViewerPipe fromViewer = viewer.newViewerPipe();
-		fromViewer.addViewerListener(this);
-		fromViewer.addSink(graph);
-
-		// Then we need a loop to do our work and to wait for events.
-		// In this loop we will need to call the
-		// pump() method before each use of the graph to copy back events
-		// that have already occurred in the viewer thread inside
-		// our thread.
-
-		while (loop) {
-			fromViewer.pump(); // or fromViewer.blockingPump(); in the nightly builds
-
-			// here your simulation code.
-
-			// You do not necessarily need to use a loop, this is only an example.
-			// as long as you call pump() before using the graph. pump() is non
-			// blocking. If you only use the loop to look at event, use blockingPump()
-			// to avoid 100% CPU usage. The blockingPump() method is only available from
-			// the nightly builds.
-		}
-
-	}
-
 	static List<Territory> allTerritories;
 	static List<Continent> continents;
 	static Graph graph;
 	static Agent[] agents;
 	static JLabel announcement;
-	static Map<String, Integer> agentIDS = new HashMap<>();
+	static BiMap<String, Integer> agentIDS = HashBiMap.create();
+	ViewerPipe vpipe;
+	static String[] colors = { "blue", "red", "darkGray", "gray", "green", "magenta", "lightGray", "orange", "yellow",
+			"pink", "cyan" };
 
-	public static void main(String[] args) {
+	private static void MapInit() {
 		agentIDS.put("Aggresive", 0);
 		agentIDS.put("Astar", 1);
 		agentIDS.put("Greedy", 2);
@@ -96,6 +74,10 @@ public class MainScreen extends JFrame implements ViewerListener {
 		agentIDS.put("Pacifist", 4);
 		agentIDS.put("RTAstar", 5);
 		agentIDS.put("Passive", 6);
+	}
+
+	public static void main(String[] args) {
+		MapInit();
 		JFrame frame = new JFrame("RISK");
 		try {
 			for (LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
@@ -109,7 +91,7 @@ public class MainScreen extends JFrame implements ViewerListener {
 		}
 		frame.setLayout(new BorderLayout());
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		frame.setJMenuBar(new MenuBar());
+		// frame.setJMenuBar(new MenuBar());
 
 		initGraph();
 
@@ -132,13 +114,22 @@ public class MainScreen extends JFrame implements ViewerListener {
 
 		buildGraph();
 
-		frame.add(new Intro(frame), BorderLayout.EAST);
+		// MainScreen ms = new MainScreen();
 		Viewer viewer = graph.display();
 		ViewPanel graphView = viewer.getDefaultView();
-		// viewer.disableAutoLayout();
-		// new MainScreen(viewer,graph);
-
-		// view.getCamera().setViewPercent(0.5);
+		// ViewerPipe fromViewer = viewer.newViewerPipe();
+		//// NodeClickListener clisten = new NodeClickListener(fromViewer, graphView,
+		// graph);
+		// fromViewer.addViewerListener(ms);
+		// fromViewer.addAttributeSink(graph);
+		// fromViewer.pump();
+		// new Thread(() -> {
+		// while (loop) {
+		// System.out.println("pumping");
+		// fromViewer.pump();
+		// sleep(2);
+		// }
+		// }).start();
 		frame.add(graphView, BorderLayout.CENTER);
 
 		announcement = new JLabel("");
@@ -156,16 +147,18 @@ public class MainScreen extends JFrame implements ViewerListener {
 			startAIGame();
 		else
 			startGame();
+
+		makeAnnouncment("End of the Game");
 	}
 
 	private static void startGame() {
-		boolean haveingAWinner = false;
+		boolean havingAWinner = false;
 		int agentId = 1;
 		int maxGameTurns = (int) Math.pow(allTerritories.size(), 2);
 		int turnCount = 0;
 
-		while (!haveingAWinner && turnCount++ < maxGameTurns) {
-			makeAnnouncment("Agent " + agentId + " Turn");
+		while (!havingAWinner && turnCount++ < maxGameTurns) {
+			makeAnnouncment("Agent " + agentIDS.inverse().get(agents[agentId - 1].id) + " Turn");
 			sleep(2);
 
 			Agent agent = agents[agentId - 1];
@@ -174,26 +167,29 @@ public class MainScreen extends JFrame implements ViewerListener {
 
 			if (action != null) {
 				System.out.println("still in the game " + action);
-				long threadId = Thread.currentThread().getId();
-				System.out.println("Thread # " + threadId + " is doing this task");
 
 				// placing armies for AI player.
 				placeArmies(action.agentPlacement);
 
 				// making attack
-				showAttack(action.attack);
+				showAttack(action.attack, agentId - 1);
 			} else {
 				makeAnnouncment("no Action for Agent " + agentId);
 				sleep(2);
 			}
-			haveingAWinner = agent.isWinner();
-			if (haveingAWinner)
+			havingAWinner = agent.isWinner();
+			if (havingAWinner) {
 				makeAnnouncment("It's all over , player " + agentId + " Won!");
-
+				sleep(2);
+			}
 			if (agentId == 1)
 				agentId = 2;
 			else
 				agentId = 1;
+		}
+		if (!havingAWinner) {
+			makeAnnouncment("Game ends with no winner ");
+			sleep(2);
 		}
 
 	}
@@ -201,16 +197,17 @@ public class MainScreen extends JFrame implements ViewerListener {
 	private static void startAIGame() {
 		Agent ai = agents[0];
 		ai.buildPath(agents[1]);
-		boolean haveingAWinner = false;
+		if (!ai.solutionFound()) {
+			makeAnnouncment(agentIDS.inverse().get(ai.id) + " Agent couldn't find a solution to win.");
+			sleep(2);
+			return;
+		}
 
-		while (!ai.gameOver() && !ai.isWinner()) {
+		while (true) {
 			Action action = ai.move();
-
 			if (action == null)
 				break; // Game End
 			System.out.println("still in the game " + action);
-			long threadId = Thread.currentThread().getId();
-			System.out.println("Thread # " + threadId + " is doing this task");
 
 			// placing armies for Passive player.
 			placeArmies(action.passivePlacement);
@@ -219,11 +216,7 @@ public class MainScreen extends JFrame implements ViewerListener {
 			placeArmies(action.agentPlacement);
 
 			// making attack
-			makeAttack(action.attack);
-
-			haveingAWinner = ai.isWinner();
-			if (haveingAWinner)
-				makeAnnouncment("It's all over , AI Won!");
+			makeAttack(action.attack, 0);
 
 		}
 	}
@@ -240,7 +233,7 @@ public class MainScreen extends JFrame implements ViewerListener {
 		}
 	}
 
-	private static void showAttack(Attack attack) {
+	private static void showAttack(Attack attack, int agetID) {
 		if (attack != null && attack.agentTerritory != null && attack.enemyTerritory != null) {
 			int enemyTerrID = attack.enemyTerritory.getId() + 1, agetTerrID = attack.agentTerritory.getId() + 1;
 			Edge e = findEdge(agetTerrID, enemyTerrID);
@@ -255,13 +248,13 @@ public class MainScreen extends JFrame implements ViewerListener {
 					agetTerrID + "_" + attack.agentTerritory.getArmies());
 			graph.getNode(enemyTerrID + "").changeAttribute("ui.label",
 					enemyTerrID + "_" + attack.enemyTerritory.getArmies());
-			graph.getNode(enemyTerrID + "").changeAttribute("ui.style", "fill-color: white,blue;");
+			graph.getNode(enemyTerrID + "").changeAttribute("ui.style", "fill-color: white," + colors[agetID] + ";");
 			sleep(5);
 			e.changeAttribute("ui.style", "shape: cubic-curve; size:2px; fill-color: black;");
 		}
 	}
 
-	private static void makeAttack(Attack attack) {
+	private static void makeAttack(Attack attack, int agetID) {
 		if (attack != null && attack.agentTerritory != null && attack.enemyTerritory != null) {
 			int enemyTerrID = attack.enemyTerritory.getId() + 1, agetTerrID = attack.agentTerritory.getId() + 1;
 			Edge e = findEdge(agetTerrID, enemyTerrID);
@@ -276,7 +269,7 @@ public class MainScreen extends JFrame implements ViewerListener {
 					agetTerrID + "_" + (attack.agentTerritory.getArmies() - attack.attackArmies));
 			graph.getNode(enemyTerrID + "").changeAttribute("ui.label",
 					enemyTerrID + "_" + (attack.attackArmies - attack.enemyTerritory.getArmies()));
-			graph.getNode(enemyTerrID + "").changeAttribute("ui.style", "fill-color: white,blue;");
+			graph.getNode(enemyTerrID + "").changeAttribute("ui.style", "fill-color: white," + colors[agetID] + ";");
 			sleep(5);
 			e.changeAttribute("ui.style", "shape: cubic-curve; size:2px; fill-color: black;");
 		}
@@ -318,6 +311,7 @@ public class MainScreen extends JFrame implements ViewerListener {
 				agents[i] = Agent.agentFactory(agentID, null, continents, allTerritories);
 				if (i > 0) {
 					agents[i - 1].setEnemy(agents[i]);
+					agents[i].setEnemy(agents[i - 1]);
 				}
 			}
 			int terrNum = scanner.nextInt();
@@ -343,8 +337,6 @@ public class MainScreen extends JFrame implements ViewerListener {
 
 	static void buildGraph() {
 		Map<Integer, GNode> allGraphNode = new HashMap<>();
-		String[] colors = { "blue", "red", "darkGray", "gray", "green", "magenta", "lightGray", "orange", "yellow",
-				"pink", "cyan" };
 		Shape shapes[] = StyleConstants.Shape.values();
 
 		// building nodes.
@@ -387,19 +379,6 @@ public class MainScreen extends JFrame implements ViewerListener {
 		}
 	}
 
-	/* Viewer Listener. */
-	public void viewClosed(String id) {
-		loop = false;
-	}
-
-	public void buttonPushed(String id) {
-		System.out.println("Button pushed on node " + id);
-	}
-
-	public void buttonReleased(String id) {
-		System.out.println("Button released on node " + id);
-	}
-
 	static void sleep(int sec) {
 		try {
 			Thread.sleep(sec * 1000);
@@ -427,5 +406,23 @@ public class MainScreen extends JFrame implements ViewerListener {
 			V1.addNeighbor(V2);
 			V2.addNeighbor(V1);
 		}
+	}
+
+	@Override
+	public void buttonPushed(String arg0) {
+		// TODO Auto-generated method stub
+		System.out.println("button pushed " + arg0);
+	}
+
+	@Override
+	public void buttonReleased(String arg0) {
+		// TODO Auto-generated method stub
+		System.out.println("button released " + arg0);
+	}
+
+	@Override
+	public void viewClosed(String arg0) {
+		// TODO Auto-generated method stub
+		System.out.println("view closed " + arg0);
 	}
 }
