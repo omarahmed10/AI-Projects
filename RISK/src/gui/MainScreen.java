@@ -20,12 +20,13 @@ import org.graphstream.graph.Edge;
 import org.graphstream.graph.Graph;
 import org.graphstream.graph.Node;
 import org.graphstream.graph.implementations.SingleGraph;
-import org.graphstream.ui.graphicGraph.stylesheet.StyleConstants;
-import org.graphstream.ui.graphicGraph.stylesheet.StyleConstants.Shape;
 import org.graphstream.ui.swingViewer.ViewPanel;
 import org.graphstream.ui.view.Viewer;
 import org.graphstream.ui.view.ViewerListener;
 import org.graphstream.ui.view.ViewerPipe;
+
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
 
 import agent.Action;
 import agent.Agent;
@@ -35,21 +36,11 @@ import game.InputReader;
 import javafx.util.Pair;
 import map.Continent;
 import map.Territory;
-import com.google.common.collect.BiMap;
-import com.google.common.collect.HashBiMap;
-import com.google.common.collect.BiMap;
-import com.google.common.collect.HashBiMap;
-import com.google.common.collect.BiMap;
-import com.google.common.collect.HashBiMap;
-import com.google.common.collect.BiMap;
-import com.google.common.collect.HashBiMap;
-import com.google.common.collect.BiMap;
-import com.google.common.collect.HashBiMap;
 
 public class MainScreen extends JFrame implements ViewerListener {
 
 	/**
-	 * 
+	 *
 	 */
 	private static final long serialVersionUID = 1L;
 
@@ -326,9 +317,10 @@ public class MainScreen extends JFrame implements ViewerListener {
 				territory.setArmies(armies);
 				agent.addTerritory(territory);
 				territory.assignOwner(agent);
-				agent.addContBonus();
-			}
 
+			}
+            agents[0].addContBonus();
+            agents[1].addContBonus();
 			scanner.close();
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
@@ -336,48 +328,50 @@ public class MainScreen extends JFrame implements ViewerListener {
 	}
 
 	static void buildGraph() {
-		Map<Integer, GNode> allGraphNode = new HashMap<>();
-		Shape shapes[] = StyleConstants.Shape.values();
+        Map<Integer, GNode> allGraphNode = new HashMap<>();
+        String shapes[] = {"CIRCLE", "TRIANGLE", "BOX", "DIAMOND", "CROSS" };
 
-		// building nodes.
-		for (Territory territory : allTerritories) {
-			graph.addNode((territory.getId() + 1) + "").addAttribute("ui.label",
-					(territory.getId() + 1) + "_" + (territory.getArmies()));
-			Node node = graph.getNode((territory.getId() + 1) + "");
-			GNode gn = new GNode(node, territory);
-			allGraphNode.put(territory.getId(), gn);
-		}
-		// building edges.
-		for (Pair<Integer, Integer> pair : ir.edges) {
-			graph.addEdge((pair.getKey() + 1) + "" + (pair.getValue() + 1), (pair.getKey() + 1) + "",
-					"" + (pair.getValue() + 1));
-		}
-		// marking continent.
-		int i = 0;
-		String[] style = new String[graph.getNodeCount()];
-		for (Continent continent : continents) {
-			for (Territory territory : continent.getTerritories()) {
-				// graph.getNode((territory.getId() + 1) + "").addAttribute(
-				// "ui.style" + "shape:" + shapes[i % shapes.length].toString().toLowerCase() +
-				// ";");
-				style[territory.getId()] = "shape: " + shapes[i % shapes.length].toString().toLowerCase() + ";";
-			}
-			i++;
-		}
-		// marking players territories.
-		i = 0;
-		for (int j = 0; j < agents.length; j++) {
-			for (Territory territory : agents[j].getTerritories()) {
-				// graph.getNode((territory.getId() + 1) + "")
-				// .addAttribute("ui.style" + "fill-color: " + colors[i % colors.length] + ";");
-				style[territory.getId()] += "fill-color: white," + colors[j % colors.length] + ";";
-			}
-		}
+        // building nodes.
+        for (Territory territory : allTerritories) {
+            graph.addNode((territory.getId() + 1) + "").addAttribute("ui.label", (territory.getId() + 1) + "_"
+                    + (territory.getArmies()));
+            Node node = graph.getNode((territory.getId() + 1) + "");
+            GNode gn = new GNode(node, territory);
+            allGraphNode.put(territory.getId(), gn);
+        }
+        // building edges.
+        for (Pair<Integer, Integer> pair : ir.edges) {
+            graph.addEdge((pair.getKey() + 1) + "" + (pair.getValue() + 1), (pair.getKey() + 1) + "", "" + (pair
+                    .getValue() + 1));
+        }
+        // marking continent.
+        int i = 0;
+        String[] style = new String[graph.getNodeCount()];
+        for (Continent continent : continents) {
+            for (Territory territory : continent.getTerritories()) {
+                // graph.getNode((territory.getId() + 1) + "").addAttribute(
+                // "ui.style" + "shape:" + shapes[i %
+                // shapes.length].toString().toLowerCase() +
+                // ";");
+                style[territory.getId()] = "shape: " + shapes[i % shapes.length].toLowerCase() + ";";
+            }
+            i++;
+        }
+        // marking players territories.
+        i = 0;
+        for (int j = 0; j < agents.length; j++) {
+            for (Territory territory : agents[j].getTerritories()) {
+                // graph.getNode((territory.getId() + 1) + "")
+                // .addAttribute("ui.style" + "fill-color: " + colors[i %
+                // colors.length] + ";");
+                style[territory.getId()] += "fill-color: white," + colors[j % colors.length] + ";";
+            }
+        }
 
-		for (int j = 0; j < graph.getNodeCount(); j++) {
-			graph.getNode((j + 1) + "").addAttribute("ui.style", style[j]);
-		}
-	}
+        for (int j = 0; j < graph.getNodeCount(); j++) {
+            graph.getNode((j + 1) + "").addAttribute("ui.style", style[j]);
+        }
+    }
 
 	static void sleep(int sec) {
 		try {

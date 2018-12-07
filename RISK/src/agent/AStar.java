@@ -71,16 +71,12 @@ public class AStar extends Agent {
 				if (!territories.contains(neighbor)) {
 					int value = 0;
 
-					if (neighbor.getContinent().getId() != territory.getContinent().getId()) {
-						if ((territory.getArmies() - neighbor.getArmies()) > 1) {
-							value = territory.getArmies() - neighbor.getArmies() + bonusArmies
-									+ neighbor.getContinent().getValue();
-						} else {
-							value = territory.getArmies() - neighbor.getArmies() + bonusArmies;
-						}
-					} else {
-						value = territory.getArmies() - neighbor.getArmies() + bonusArmies;
-					}
+                    if ((territory.getArmies() - neighbor.getArmies()) + bonusArmies > 1) {
+                        value = territory.getArmies() - neighbor.getArmies() + bonusArmies + neighbor.getContinent()
+                                .getValue();
+                    } else {
+                        value = territory.getArmies() - neighbor.getArmies() + bonusArmies;
+                    }
 					if (allAttacksMap.containsKey(territory)) {
 						if (value > allAttacksMap.get(territory)) {
 							allAttacksMap.put(territory, value);
@@ -169,7 +165,7 @@ public class AStar extends Agent {
 			}
 		}
 	}
-	
+
 	@Override
 	public boolean solutionFound() {
 		return path != null && !path.isEmpty();
