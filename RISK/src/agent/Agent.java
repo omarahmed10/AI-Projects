@@ -1,9 +1,11 @@
 package agent;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
 
 import map.Continent;
 import map.SemiContinent;
@@ -13,7 +15,7 @@ public class Agent {
 	protected List<Continent> continents;
 	protected List<Territory> allTerritories;
 	protected List<Territory> territories;
-	protected List<SemiContinent> semiContinents;
+	protected Map<Integer, SemiContinent> semiContinents;
 	protected int bonusArmies;
 	protected Agent enemy;
 	protected int searchExp;
@@ -24,7 +26,7 @@ public class Agent {
 		this.territories = new ArrayList<>();
 		Territory.clone(this.territories, clone.territories, this);
 		this.continents = clone.continents;
-		this.semiContinents = new ArrayList<>();
+		this.semiContinents = new HashMap<>();
 		SemiContinent.clone(this.semiContinents, clone.semiContinents, this);
 		this.bonusArmies = clone.bonusArmies;
 		this.searchExp = clone.searchExp;
@@ -48,9 +50,9 @@ public class Agent {
 	}
 
 	private void initSemiContinents() {
-		semiContinents = new ArrayList<>();
+		semiContinents = new HashMap<>();
 		for (int i = 0; i < continents.size(); i++) {
-			semiContinents.add(new SemiContinent(i, continents.get(i).getValue()));
+			semiContinents.put(i, new SemiContinent(i, continents.get(i).getValue()));
 			semiContinents.get(i).setDiff(continents.get(i).getTerritories().size());
 		}
 	}
@@ -58,10 +60,10 @@ public class Agent {
 	public static Agent agentFactory(Agent clone) {
 		if (clone.id == 1)
 			return new AStar(clone);
-        else if (clone.id == 2)
-            return new Greedy(clone);
-        else if (clone.id == 5)
-            return new RtAStar(clone);
+		else if (clone.id == 2)
+			return new Greedy(clone);
+		else if (clone.id == 5)
+			return new RtAStar(clone);
 		else
 			return new Passive(clone);
 	}
@@ -83,12 +85,25 @@ public class Agent {
 			return new Passive(6, enemy, continents, allTerritories);
 	}
 
-	public void placeArmies() {
+	public ArmyPlacement placeArmies() {
+		return null;
+	}
+
+	public Attack attack() {
+		return null;
+	}
+
+	public Action move() {
+		return null;
+	}
+
+	public void buildPath(Agent agent) {
+		// TODO Auto-generated method stub
 
 	}
 
-	public void attack() {
-
+	public boolean solutionFound() {
+		return false;
 	}
 
 	public List<Territory> possAttTerrs() {
@@ -106,12 +121,14 @@ public class Agent {
 		return possAttTerrs;
 	}
 
-	public Set<Attack> possibleAttacks() {
-		Set<Attack> possAttaks = new HashSet<>();
+	public List<Attack> possibleAttacks() {
+		List<Attack> possAttaks = new ArrayList<>();
 		for (Territory territory : territories) {
 			for (Territory neighbor : territory.getNeighbors()) {
 				if (!territories.contains(neighbor) && (territory.getArmies() - neighbor.getArmies()) > 1) {
-					possAttaks.add(new Attack(territory, neighbor, neighbor.getArmies() + 1));
+					Attack a = new Attack(territory, neighbor, neighbor.getArmies() + 1);
+					if (!possAttaks.contains(a))
+						possAttaks.add(a);
 				}
 			}
 		}
@@ -133,7 +150,6 @@ public class Agent {
 		int oldDiff = semiContinent.getDiff();
 		semiContinent.removeTerritory(territory);
 		semiContinent.setDiff(semiContinent.getDiff() + 1);
-
 		if (oldDiff == 0 && bonusArmies > 0) {
 			bonusArmies -= semiContinent.getValue();
 		}
@@ -151,14 +167,13 @@ public class Agent {
 		return territories;
 	}
 
-	public List<SemiContinent> getSemiContinents() {
+	public Map<Integer, SemiContinent> getSemiContinents() {
 		return semiContinents;
 	}
 
 	public void doAttack(Attack attack) {
 		// May be the territory is neutral
-		if (attack.enemyTerritory.getOwner() != null)
-			attack.enemyTerritory.getOwner().removeTerritory(attack.enemyTerritory);
+		attack.enemyTerritory.getOwner().removeTerritory(attack.enemyTerritory);
 
 		attack.agentTerritory.setArmies(attack.agentTerritory.getArmies() - attack.attackArmies);
 		attack.enemyTerritory.setArmies(attack.attackArmies - attack.enemyTerritory.getArmies());
@@ -183,14 +198,14 @@ public class Agent {
 	}
 
 	public void addContBonus() {
-		for (SemiContinent semiContinent : semiContinents) {
+		for (SemiContinent semiContinent : semiContinents.values()) {
 			if (semiContinent.getDiff() == 0)
 				bonusArmies += semiContinent.getValue();
 		}
 	}
 
 	public boolean isWinner() {
-		for (SemiContinent semiContinent : semiContinents) {
+		for (SemiContinent semiContinent : semiContinents.values()) {
 			if (semiContinent.getDiff() != 0) {
 				return false;
 			}
@@ -200,7 +215,7 @@ public class Agent {
 
 	public boolean gameOver() {
 		boolean gameOver = true;
-		for (SemiContinent semiContinent : semiContinents) {
+		for (SemiContinent semiContinent : semiContinents.values()) {
 			if (semiContinent.getDiff() != 0) {
 				gameOver = false;
 				break;
@@ -217,7 +232,12 @@ public class Agent {
 
 		Agent aObj = (Agent) obj;
 		return listEqualsIgnoreOrder(territories, aObj.territories)
-				&& listEqualsIgnoreOrder(semiContinents, aObj.semiContinents);
+				&& listEqualsIgnoreOrder(semiContinents.values(), aObj.semiContinents.values());
+	}
+
+	private boolean listEqualsIgnoreOrder(Collection<SemiContinent> values, Collection<SemiContinent> values2) {
+		// TODO Auto-generated method stub
+		return new HashSet<>(values).equals(new HashSet<>(values2));
 	}
 
 	public static <T> boolean listEqualsIgnoreOrder(List<T> list1, List<T> list2) {
@@ -226,9 +246,8 @@ public class Agent {
 
 	@Override
 	public String toString() {
-        String s = "Agent : " + "Territories : " + territories + " ,, ";
-        s += "\nAgent: Semicontinents : " + semiContinents + ",,Bonus :" + bonusArmies
-                + "\n";
+		String s = "Agent : " + "Territories : " + territories + " ,, ";
+		s += "\nAgent: Semicontinents : " + semiContinents.values() + ",,Bonus :" + bonusArmies + "\n";
 		return s;
 	}
 

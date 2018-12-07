@@ -1,5 +1,6 @@
 package agent;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -18,29 +19,46 @@ public class Aggressive extends Agent {
 
 	public Aggressive(int id, Agent enemy, List<Continent> continents, List<Territory> allTerritories) {
 		super(id, enemy, continents, allTerritories);
-		// TODO Auto-generated constructor stub
 	}
 
 	@Override
-	public void placeArmies() {
-		super.placeArmies();
+	public Action move() {
+		Action action = new Action();
+		action.agentPlacement = placeArmies();
+		action.attack = attack();
+		addContBonus();
+		return action.agentPlacement == null && action.attack == null ? null : action;
+	}
+
+	@Override
+	public ArmyPlacement placeArmies() {
+
+		if (bonusArmies <= 0)
+			return null;
 
 		Territory maxTerritory = Collections.max(territories);
 		maxTerritory.setArmies(bonusArmies + maxTerritory.getArmies());
 
+		ArmyPlacement ap = new ArmyPlacement();
+		ap.terrID = maxTerritory.getId();
+		ap.armyCount = maxTerritory.getArmies();
+		ap.bonusAdded = bonusArmies;
+
 		bonusArmies = 0;
+		return ap;
 	}
 
 	@Override
-	public void attack() {
+	public Attack attack() {
 		List<Territory> possAttTerrs = possAttTerrs();
 
 		if (possAttTerrs.isEmpty()) {
 			System.out.println("No territory can be attacked!");
-			return;
+			return null;
 		}
 
-		List<SemiContinent> enemySemiConts = enemy.getSemiContinents();
+		Attack attack = null;
+		List<SemiContinent> enemySemiConts = new ArrayList<>(enemy.getSemiContinents().values());
 		Collections.sort(enemySemiConts);
 
 		Collections.sort(possAttTerrs);
@@ -71,11 +89,15 @@ public class Aggressive extends Agent {
 
 			if (territories.contains(neighbor)) {
 				// attack with all armies except for one
-				doAttack(neighbor, attTerr, neighbor.getArmies() - 1);
+				attack = new Attack();
+				attack.agentTerritory = neighbor;
+				attack.enemyTerritory = attTerr;
+				attack.attackArmies = neighbor.getArmies() - 1;
+				doAttack(attack);
 				break;
 			}
 		}
-
+		return attack;
 	}
 
 }

@@ -6,16 +6,19 @@ import java.util.Comparator;
 import java.util.List;
 
 import game.AIGame;
+import gui.MainScreen;
 import map.Territory;
 
-public class AgentState implements Comparable<AgentState> {
+public class AgentState {
     protected Agent aiAgent;
     protected Agent passiveAggent;
     protected int gx = 0; // cost to reach state.
     protected int hx = 0; // cost to reach goal.
     protected AgentState parent = null;
     protected Attack attack; // attack to reach state.
-
+    protected ArmyPlacement agentPlacement;
+    protected ArmyPlacement passivePlacement;
+    
     public AgentState(Agent agent, Agent passive, AgentState parent) {
         this.aiAgent = agent;
         this.parent = parent;
@@ -28,18 +31,7 @@ public class AgentState implements Comparable<AgentState> {
         this.aiAgent.enemy = this.passiveAggent;
         List<Territory> all = new ArrayList<>(this.passiveAggent.territories);
         all.addAll(this.aiAgent.territories);
-        Collections.sort(all, new Comparator<Territory>() {
-            @Override
-            public int compare(Territory o1, Territory o2) {
-                if (o1.getId() > o2.getId())
-                    return 1;
-                if (o1.getId() < o2.getId())
-                    return -1;
-                return 0;
-            }
-
-        });
-        AIGame.buildNeighbors(all);
+        MainScreen.buildNeighbors(all);
         this.gx = clone.gx;
         this.hx = clone.hx;
         this.parent = clone.parent;
@@ -51,8 +43,8 @@ public class AgentState implements Comparable<AgentState> {
     }
 
     public List<AgentState> getNeighbors() {
-        passiveAggent.placeArmies(); /* Making Passive player move. */
-        aiAgent.placeArmies();
+        passivePlacement = passiveAggent.placeArmies(); /* Making Passive player move. */
+        agentPlacement = aiAgent.placeArmies();
         List<AgentState> neighbours = new ArrayList<>();
         for (Attack attack : aiAgent.possibleAttacks()) {
             AgentState newNeighbour = new AgentState(this);
@@ -65,7 +57,7 @@ public class AgentState implements Comparable<AgentState> {
         return neighbours;
     }
 
-    private Attack getAttack(Attack attack, AgentState newState) {
+    protected static Attack getAttack(Attack attack, AgentState newState) {
         Attack newAttack = new Attack();
         for (Territory t : newState.aiAgent.territories) {
             if (t.equals(attack.agentTerritory)) {
@@ -98,15 +90,6 @@ public class AgentState implements Comparable<AgentState> {
         String s = "gx =" + gx + " hx =" + hx + "\n" + "Agent State : AI" + aiAgent.toString() + "\n" + "Passive "
                 + aiAgent.enemy.toString() + a + "\n\n";
         return s;
-    }
-
-    @Override
-    public int compareTo(AgentState o) {
-        if (fx() > o.fx())
-            return 1;
-        if (fx() < o.fx())
-            return -1;
-        return 0;
     }
 
 }

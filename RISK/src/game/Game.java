@@ -2,20 +2,35 @@ package game;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
+
+import org.graphstream.ui.view.ViewerPipe;
 
 import agent.Agent;
 import map.Continent;
 import map.Territory;
 
 public class Game {
+	static Map<String, Integer> agentIDS = new HashMap<>();
+	static List<Territory> allTerritories;
+	static List<Continent> continents;
+	
 	public static void main(String[] args) {
+		agentIDS.put("Aggresive", 0);
+		agentIDS.put("Astar", 1);
+		agentIDS.put("Greedy", 2);
+		agentIDS.put("Human", 3);
+		agentIDS.put("Pacifist", 4);
+		agentIDS.put("RTAstar", 5);
+		agentIDS.put("Passive", 6);
 		Scanner scanner = new Scanner(System.in);
 
 		InputReader ir = new InputReader("input.txt");
-		List<Territory> allTerritories = ir.getTerritories();
-		List<Continent> continents = ir.getContinents();
+		allTerritories = ir.getTerritories();
+		continents = ir.getContinents();
 
 		for (Continent continent : continents) {
 			for (Territory territory : continent.getTerritories()) {
@@ -90,12 +105,19 @@ public class Game {
 		scanner.close();
 	}
 
-	public static void intialPlace(String filePath,
-			List<Territory> allTerritories, Agent[] agents) {
+	public static void intialPlace(String filePath, List<Territory> allTerritories, Agent[] agents) {
 		try {
 			Scanner scanner = new Scanner(new File(filePath));
+			int playerCount = scanner.nextInt();
+			agents = new Agent[playerCount];
+			for (int i = 0; i < playerCount; i++) {
+				int agentID = agentIDS.get(scanner.next());
+				agents[i] = Agent.agentFactory(agentID, null, continents, allTerritories);
+				if (i > 0) {
+					agents[i - 1].setEnemy(agents[i]);
+				}
+			}
 			int terrNum = scanner.nextInt();
-
 			for (int i = 0; i < terrNum; i++) {
 				int terrId = scanner.nextInt();
 				int armies = scanner.nextInt();

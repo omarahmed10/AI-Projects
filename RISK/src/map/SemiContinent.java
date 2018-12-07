@@ -2,6 +2,7 @@ package map;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import agent.Agent;
 
@@ -46,13 +47,14 @@ public class SemiContinent extends Continent implements Comparable<SemiContinent
 
 	@Override
 	public boolean equals(Object obj) {
-		return super.equals(obj) && diff == ((SemiContinent)obj).diff;
+		return super.equals(obj) && diff == ((SemiContinent) obj).diff;
 	}
-	
-	public static void clone(List<SemiContinent> dest, List<SemiContinent> source, Agent owner) {
-		for (SemiContinent sc : source) {
+
+	public static void clone(Map<Integer, SemiContinent> semiContinents, Map<Integer, SemiContinent> semiContinents2,
+			Agent owner) {
+		for (SemiContinent sc : semiContinents2.values()) {
 			SemiContinent scNew = new SemiContinent(sc, owner);
-			dest.add(scNew);
+			semiContinents.put(scNew.id, scNew);
 		}
 	}
 
