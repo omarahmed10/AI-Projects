@@ -23,12 +23,26 @@ public class Greedy extends Agent {
 		super(clone);
 	}
 
+	// private int h(AgentState x) {
+	// int h = 0;
+	// for (SemiContinent sc : x.aiAgent.semiContinents.values()) {
+	// if (sc.getDiff() != 0) {
+	// h++;
+	// }
+	// }
+	// return h;
+	// }
 	private int h(AgentState x) {
 		int h = 0;
-		for (SemiContinent sc : x.aiAgent.semiContinents.values()) {
-			if (sc.getDiff() != 0) {
-				h++;
+		// add all continents value which the opponent has.
+		for (SemiContinent sc : x.passiveAggent.semiContinents.values()) {
+			if (!sc.getTerritories().isEmpty()) {
+				h += sc.getValue();
 			}
+		}
+		// add all territories armies which the opponent has.
+		for (Territory tr : x.passiveAggent.territories) {
+			h += tr.getArmies();
 		}
 		return h;
 	}
@@ -64,12 +78,12 @@ public class Greedy extends Agent {
 				if (!territories.contains(neighbor)) {
 					int value = 0;
 
-                    if ((territory.getArmies() - neighbor.getArmies()) + bonusArmies > 1) {
-                        value = territory.getArmies() - neighbor.getArmies() + bonusArmies + neighbor.getContinent()
-                                .getValue();
-                    } else {
-                        value = territory.getArmies() - neighbor.getArmies() + bonusArmies;
-                    }
+					if ((territory.getArmies() - neighbor.getArmies()) + bonusArmies > 1) {
+						value = territory.getArmies() - neighbor.getArmies() + bonusArmies
+								+ neighbor.getContinent().getValue();
+					} else {
+						value = territory.getArmies() - neighbor.getArmies() + bonusArmies;
+					}
 					if (allAttacksMap.containsKey(territory)) {
 						if (value > allAttacksMap.get(territory)) {
 							allAttacksMap.put(territory, value);
@@ -109,7 +123,7 @@ public class Greedy extends Agent {
 	public Stack<AgentState> path = new Stack<>();
 
 	@Override
-    public void buildPath(Agent agentPassive) {
+	public void buildPath(Agent agentPassive) {
 		PriorityQueue<AgentState> frontier = new PriorityQueue<>(new Comparator<AgentState>() {
 			@Override
 			public int compare(AgentState o1, AgentState o2) {
@@ -138,20 +152,22 @@ public class Greedy extends Agent {
 					path.push(currentState);
 					currentState = currentState.parent;
 				}
+				L = path.size() - 1;
 				/// save that path...
 				return;
 			}
 
 			for (AgentState neighbor : currentState.getNeighbors()) {
-				int new_hx = h(neighbor), new_gx = 0;
+				int new_hx = h(neighbor), new_gx = currentState.gx + 1;
 				if (frontier.contains(neighbor)) {
-					if (neighbor.fx() > new_hx + new_gx) {
+					if (neighbor.hx > new_hx) {
 						frontier.remove(neighbor);
 					}
 				}
 				if (!frontier.contains(neighbor) && !explored.contains(neighbor)) {
 					neighbor.hx = new_hx;
 					neighbor.gx = new_gx;
+					T = Math.max(T, new_gx);
 					neighbor.parent = currentState;
 					frontier.add(neighbor);
 				}

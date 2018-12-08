@@ -86,7 +86,7 @@ public class MainScreen extends JFrame implements ViewerListener {
 
 		initGraph();
 
-		ir = new InputReader("input.txt");
+		ir = new InputReader("input2.txt");
 		allTerritories = ir.getTerritories();
 		continents = ir.getContinents();
 		for (Continent continent : continents) {
@@ -95,7 +95,7 @@ public class MainScreen extends JFrame implements ViewerListener {
 			}
 		}
 
-		intialPlace("initialPlacement.txt", allTerritories);
+		intialPlace("init2.txt", allTerritories);
 
 		for (int i = 0; i < agents.length; i++) {
 			System.out.println("Agent " + (i + 1) + " info :");
@@ -208,8 +208,12 @@ public class MainScreen extends JFrame implements ViewerListener {
 
 			// making attack
 			makeAttack(action.attack, 0);
-
+			
 		}
+		System.out.println("when f = 1 ,P = "+ai.getPerformance(1));
+		System.out.println("when f = 100 ,P = "+ai.getPerformance(100));
+		System.out.println("when f = 10000 ,P = "+ai.getPerformance(110000));
+		
 	}
 
 	private static void placeArmies(ArmyPlacement placement) {
@@ -287,7 +291,7 @@ public class MainScreen extends JFrame implements ViewerListener {
 		graph.addAttribute("ui.stylesheet", "graph {fill-color: gray;}"
 				+ "node { text-alignment: justify; size: 70px, 40px; "
 				+ "text-offset: 0px, 4px; text-size:20px; text-color: black; fill-color:yellow,white; fill-mode: gradient-vertical;}"
-				+ "edge { shape: cubic-curve; size:2px; fill-color: black;}");
+				+ "edge { size:2px; fill-color: black;}");
 		graph.addAttribute("ui.quality");
 		graph.addAttribute("ui.antialias");
 	}
@@ -328,16 +332,12 @@ public class MainScreen extends JFrame implements ViewerListener {
 	}
 
 	static void buildGraph() {
-        Map<Integer, GNode> allGraphNode = new HashMap<>();
         String shapes[] = {"CIRCLE", "TRIANGLE", "BOX", "DIAMOND", "CROSS" };
 
         // building nodes.
         for (Territory territory : allTerritories) {
             graph.addNode((territory.getId() + 1) + "").addAttribute("ui.label", (territory.getId() + 1) + "_"
                     + (territory.getArmies()));
-            Node node = graph.getNode((territory.getId() + 1) + "");
-            GNode gn = new GNode(node, territory);
-            allGraphNode.put(territory.getId(), gn);
         }
         // building edges.
         for (Pair<Integer, Integer> pair : ir.edges) {
@@ -395,6 +395,7 @@ public class MainScreen extends JFrame implements ViewerListener {
 
 		});
 		for (Pair<Integer, Integer> pair : ir.edges) {
+//			System.out.println(pair);
 			Territory V1 = all.get(pair.getKey());
 			Territory V2 = all.get(pair.getValue());
 			V1.addNeighbor(V2);

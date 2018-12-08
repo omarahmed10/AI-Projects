@@ -1,8 +1,0 @@
-/**
- * 
- */
-/**
- * @author omar
- *
- */
-package images;

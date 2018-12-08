@@ -1,0 +1,5 @@
+AStar 
+when f = 1 ,P = 7
+when f = 100 ,P = 403
+when f = 10000 ,P = 440003
+

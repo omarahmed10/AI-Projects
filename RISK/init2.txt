@@ -1,0 +1,24 @@
+2
+Greedy
+Passive
+10
+1 5 1
+2 2 2
+3 3 1
+4 5 2
+5 4 1
+6 1 2
+7 2 1
+8 6 2
+9 4 1
+10 4 2
+
+Format :
+player_count
+player_id  agentType  #note player one assumed to be the AI agent in case of AI Game.
+number_of_territories 
+terrId	armies	agentId
+agentId = 1 (agent1) & 2 (agent2)
+
+Agent types :
+Aggresive - Astar - Greedy - Human - Pacifist - RTAstar - Passive

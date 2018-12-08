@@ -19,6 +19,7 @@ public class Agent {
 	protected int bonusArmies;
 	protected Agent enemy;
 	protected int searchExp;
+	protected int L = 0, T = 0;
 	public int id;
 
 	public Agent(Agent clone) {
@@ -126,7 +127,7 @@ public class Agent {
 		for (Territory territory : territories) {
 			for (Territory neighbor : territory.getNeighbors()) {
 				if (!territories.contains(neighbor) && (territory.getArmies() - neighbor.getArmies()) > 1) {
-					Attack a = new Attack(territory, neighbor, neighbor.getArmies() + 1);
+					Attack a = new Attack(territory, neighbor, territory.getArmies() - 1);
 					if (!possAttaks.contains(a))
 						possAttaks.add(a);
 				}
@@ -183,20 +184,6 @@ public class Agent {
 		bonusArmies = 2;
 	}
 
-	public void doAttack(Territory agentTerritory, Territory enemyTerritory, int attackArmies) {
-		agentTerritory.setArmies(agentTerritory.getArmies() - attackArmies);
-		enemyTerritory.setArmies(attackArmies - enemyTerritory.getArmies());
-
-		// May be the territory is neutral
-		if (enemyTerritory.getOwner() != null)
-			enemyTerritory.getOwner().removeTerritory(enemyTerritory);
-
-		enemyTerritory.assignOwner(this);
-		addTerritory(enemyTerritory);
-
-		bonusArmies = 2;
-	}
-
 	public void addContBonus() {
 		for (SemiContinent semiContinent : semiContinents.values()) {
 			if (semiContinent.getDiff() == 0)
@@ -222,6 +209,10 @@ public class Agent {
 			}
 		}
 		return gameOver;
+	}
+
+	public int getPerformance(int f) {
+		return f * L + T;
 	}
 
 	/*

@@ -30,12 +30,26 @@ public class AStar extends Agent {
 
 	}
 
+	// private int h(AgentState x) {
+	// int h = 0;
+	// for (SemiContinent sc : x.aiAgent.semiContinents.values()) {
+	// if (sc.getDiff() != 0) {
+	// h++;
+	// }
+	// }
+	// return h;
+	// }
 	private int h(AgentState x) {
 		int h = 0;
-		for (SemiContinent sc : x.aiAgent.semiContinents.values()) {
-			if (sc.getDiff() != 0) {
-				h++;
+		// add all continents value which the opponent has.
+		for (SemiContinent sc : x.passiveAggent.semiContinents.values()) {
+			if (!sc.getTerritories().isEmpty()) {
+				h += sc.getValue();
 			}
+		}
+		// add all territories armies which the opponent has.
+		for (Territory tr : x.passiveAggent.territories) {
+			h += tr.getArmies();
 		}
 		return h;
 	}
@@ -71,12 +85,12 @@ public class AStar extends Agent {
 				if (!territories.contains(neighbor)) {
 					int value = 0;
 
-                    if ((territory.getArmies() - neighbor.getArmies()) + bonusArmies > 1) {
-                        value = territory.getArmies() - neighbor.getArmies() + bonusArmies + neighbor.getContinent()
-                                .getValue();
-                    } else {
-                        value = territory.getArmies() - neighbor.getArmies() + bonusArmies;
-                    }
+					if ((territory.getArmies() - neighbor.getArmies()) + bonusArmies > 1) {
+						value = territory.getArmies() - neighbor.getArmies() + bonusArmies
+								+ neighbor.getContinent().getValue();
+					} else {
+						value = territory.getArmies() - neighbor.getArmies() + bonusArmies;
+					}
 					if (allAttacksMap.containsKey(territory)) {
 						if (value > allAttacksMap.get(territory)) {
 							allAttacksMap.put(territory, value);
@@ -121,9 +135,9 @@ public class AStar extends Agent {
 			@Override
 			public int compare(AgentState o1, AgentState o2) {
 				if (o1.fx() > o2.fx())
-		            return 1;
-		        if (o1.fx() < o2.fx())
-		            return -1;
+					return 1;
+				if (o1.fx() < o2.fx())
+					return -1;
 				return 0;
 			}
 		});
@@ -145,6 +159,7 @@ public class AStar extends Agent {
 					currentState = currentState.parent;
 				}
 				System.out.println("winner found");
+				L = path.size() - 1;
 				/// save that path...
 				return;
 			}
@@ -159,6 +174,7 @@ public class AStar extends Agent {
 				if (!frontier.contains(neighbor) && !explored.contains(neighbor)) {
 					neighbor.hx = new_hx;
 					neighbor.gx = new_gx;
+					T = Math.max(T, new_gx);
 					neighbor.parent = currentState;
 					frontier.add(neighbor);
 				}

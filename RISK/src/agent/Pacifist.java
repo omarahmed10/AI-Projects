@@ -44,7 +44,7 @@ public class Pacifist extends Agent {
 		addContBonus();
 		return action.agentPlacement == null && action.attack == null ? null : action;
 	}
-	
+
 	@Override
 	public Attack attack() {
 		List<Territory> possAttTerrs = possAttTerrs();
@@ -68,7 +68,7 @@ public class Pacifist extends Agent {
 				attack = new Attack();
 				attack.agentTerritory = neighbor;
 				attack.enemyTerritory = minTerritory;
-				attack.attackArmies = minTerritory.getArmies() + 1;
+				attack.attackArmies = neighbor.getArmies() - 1;
 				doAttack(attack);
 				break;
 			}
